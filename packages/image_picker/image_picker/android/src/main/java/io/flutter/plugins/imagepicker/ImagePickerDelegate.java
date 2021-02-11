@@ -396,8 +396,9 @@ public class ImagePickerDelegate
     File image;
 
     try {
-      image = File.createTempFile(filename, suffix, externalFilesDirectory);
-    } catch (IOException e) {
+//      image = File.createTempFile(filename, suffix, externalFilesDirectory);
+      image = new File(externalFilesDirectory, filename.concat(suffix));
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
 

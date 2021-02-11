@@ -220,7 +220,7 @@ public class ImagePickerPlugin
     final ImagePickerCache cache = new ImagePickerCache(setupActivity);
 
     final File externalFilesDirectory =
-        setupActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        setupActivity.getExternalFilesDirs(Environment.DIRECTORY_PICTURES)[0];
     final ExifDataCopier exifDataCopier = new ExifDataCopier();
     final ImageResizer imageResizer = new ImageResizer(externalFilesDirectory, exifDataCopier);
     return new ImagePickerDelegate(setupActivity, externalFilesDirectory, imageResizer, cache);
