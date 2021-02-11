@@ -41,7 +41,8 @@ class FileUtils {
     try {
       String extension = getImageExtension(uri);
       inputStream = context.getContentResolver().openInputStream(uri);
-      file = File.createTempFile("image_picker", extension, context.getCacheDir());
+//      file = File.createTempFile("image_picker", extension, context.getCacheDir());
+      file = new File(context.getCacheDir(),"image_picker"+extension);
       file.deleteOnExit();
       outputStream = new FileOutputStream(file);
       if (inputStream != null) {
