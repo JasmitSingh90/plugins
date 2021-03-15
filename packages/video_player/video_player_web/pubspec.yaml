@@ -20,7 +20,10 @@ dependencies:
     sdk: flutter
   meta: ^1.1.7
   video_player_platform_interface: 
-    path: ../video_player_platform_interface
+    git:
+        url: https://github.com/iAmPlus/plugins.git
+        ref: video_player-v1.0.1/audio-configuration-enabled-IOS
+        path: packages/video_player/video_player_platform_interface
 
 dev_dependencies:
   flutter_test:
