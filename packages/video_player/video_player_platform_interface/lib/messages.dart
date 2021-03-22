@@ -189,8 +189,11 @@ class VideoPlayerApi {
     }
   }
 
-  Future<TextureMessage> create(CreateMessage arg) async {
+  Future<TextureMessage> create(
+      CreateMessage arg, bool isDefaultAudioConfigurationEnabled) async {
     final Map<dynamic, dynamic> requestMap = arg._toMap();
+    requestMap['isDefaultAudioConfigurationEnabled'] =
+        isDefaultAudioConfigurationEnabled;
     const BasicMessageChannel<dynamic> channel = BasicMessageChannel<dynamic>(
         'dev.flutter.pigeon.VideoPlayerApi.create', StandardMessageCodec());
 
