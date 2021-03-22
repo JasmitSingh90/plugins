@@ -450,6 +450,8 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
 @property(readonly, weak, nonatomic) NSObject<FlutterBinaryMessenger>* messenger;
 @property(readonly, strong, nonatomic) NSMutableDictionary* players;
 @property(readonly, strong, nonatomic) NSObject<FlutterPluginRegistrar>* registrar;
+@property(nonatomic) bool isDefaultAudioConfigurationEnabled;
+
 @end
 
 @implementation FLTVideoPlayerPlugin
@@ -465,6 +467,8 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
   _registry = [registrar textures];
   _messenger = [registrar messenger];
   _registrar = registrar;
+  _isDefaultAudioConfigurationEnabled = true;
+
   _players = [NSMutableDictionary dictionaryWithCapacity:1];
   return self;
 }
@@ -498,8 +502,7 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
 }
 
 - (void)initialize:(FlutterError* __autoreleasing*)error {
-  // Allow audio playback when the Ring/Silent switch is set to silent
-  [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
+  
 
   for (NSNumber* textureId in _players) {
     [_registry unregisterTexture:[textureId unsignedIntegerValue]];
@@ -511,6 +514,12 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
 - (FLTTextureMessage*)create:(FLTCreateMessage*)input error:(FlutterError**)error {
   FLTFrameUpdater* frameUpdater = [[FLTFrameUpdater alloc] initWithRegistry:_registry];
   FLTVideoPlayer* player;
+    _isDefaultAudioConfigurationEnabled=input.isDefaultAudioConfigurationEnabled;
+
+  if (_isDefaultAudioConfigurationEnabled) {
+    // Allow audio playback when the Ring/Silent switch is set to silent
+  [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
+  }
   if (input.asset) {
     NSString* assetPath;
     if (input.packageName) {
@@ -591,6 +600,8 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
 
 - (void)setMixWithOthers:(FLTMixWithOthersMessage*)input
                    error:(FlutterError* _Nullable __autoreleasing*)error {
+
+  if(_isDefaultAudioConfigurationEnabled){
   if ([input.mixWithOthers boolValue]) {
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback
                                      withOptions:AVAudioSessionCategoryOptionMixWithOthers
@@ -598,6 +609,7 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
   } else {
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
   }
+                     }
 }
 
 @end

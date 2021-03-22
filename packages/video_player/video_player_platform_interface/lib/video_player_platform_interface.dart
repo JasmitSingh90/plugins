@@ -66,7 +66,8 @@ abstract class VideoPlayerPlatform {
   }
 
   /// Creates an instance of a video player and returns its textureId.
-  Future<int?> create(DataSource dataSource) {
+  Future<int?> create(
+      DataSource dataSource, bool isDefaultAudioConfigurationEnabled) {
     throw UnimplementedError('create() has not been implemented.');
   }
 

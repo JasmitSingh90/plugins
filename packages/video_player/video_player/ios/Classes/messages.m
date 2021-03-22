@@ -85,6 +85,12 @@ static NSDictionary *wrapResult(NSDictionary *result, FlutterError *error) {
   if ((NSNull *)result.formatHint == [NSNull null]) {
     result.formatHint = nil;
   }
+  result.isDefaultAudioConfigurationEnabled = dict[@"isDefaultAudioConfigurationEnabled"];
+  if ((NSNull *)result.isDefaultAudioConfigurationEnabled == [NSNull null]) {
+    result.isDefaultAudioConfigurationEnabled = nil;
+  }
+
+
   return result;
 }
 - (NSDictionary *)toMap {
@@ -94,7 +100,9 @@ static NSDictionary *wrapResult(NSDictionary *result, FlutterError *error) {
                                    (self.packageName ? self.packageName : [NSNull null]),
                                    @"packageName",
                                    (self.formatHint ? self.formatHint : [NSNull null]),
-                                   @"formatHint", nil];
+                                   @"formatHint",
+                                   (self.isDefaultAudioConfigurationEnabled ? self.isDefaultAudioConfigurationEnabled : [NSNull null]),
+                                   @"isDefaultAudioConfigurationEnabled", nil];
 }
 @end
 
