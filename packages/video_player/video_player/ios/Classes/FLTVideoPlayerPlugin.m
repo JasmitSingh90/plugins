@@ -514,8 +514,8 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
 - (FLTTextureMessage*)create:(FLTCreateMessage*)input error:(FlutterError**)error {
   FLTFrameUpdater* frameUpdater = [[FLTFrameUpdater alloc] initWithRegistry:_registry];
   FLTVideoPlayer* player;
-    _isDefaultAudioConfigurationEnabled=input.isDefaultAudioConfigurationEnabled;
-
+    _isDefaultAudioConfigurationEnabled = [input.isDefaultAudioConfigurationEnabled boolValue];
+    
   if (_isDefaultAudioConfigurationEnabled) {
     // Allow audio playback when the Ring/Silent switch is set to silent
   [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
