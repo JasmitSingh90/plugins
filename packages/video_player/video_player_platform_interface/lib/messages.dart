@@ -198,8 +198,7 @@ class VideoPlayerApi {
     const BasicMessageChannel<dynamic> channel = BasicMessageChannel<dynamic>(
         'dev.flutter.pigeon.VideoPlayerApi.create', StandardMessageCodec());
 
-    final Map<dynamic, dynamic>? replyMap =
-        await (channel.send(requestMap) as Future<dynamic>);
+    final Map<dynamic, dynamic>? replyMap = await (channel.send(requestMap));
     if (replyMap == null) {
       throw PlatformException(
           code: 'channel-error',
@@ -407,8 +406,7 @@ class VideoPlayerApi {
         'dev.flutter.pigeon.VideoPlayerApi.setMixWithOthers',
         StandardMessageCodec());
 
-    final Map<dynamic, dynamic>? replyMap =
-        await (channel.send(requestMap) as Future<dynamic>);
+    final Map<dynamic, dynamic>? replyMap = await (channel.send(requestMap));
     if (replyMap == null) {
       throw PlatformException(
           code: 'channel-error',
