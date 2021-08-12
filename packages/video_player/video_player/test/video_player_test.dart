@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 import 'dart:io';
@@ -26,7 +26,7 @@ class FakeController extends ValueNotifier<VideoPlayerValue>
   }
 
   @override
-  int textureId;
+  int? textureId;
 
   @override
   String get dataSource => '';
@@ -35,13 +35,13 @@ class FakeController extends ValueNotifier<VideoPlayerValue>
   DataSourceType get dataSourceType => DataSourceType.file;
 
   @override
-  String get package => null;
+  String? get package => null;
 
   @override
   Future<Duration> get position async => value.position;
 
   @override
-  Future<void> seekTo(Duration moment) async {}
+  Future<void> seekTo(Duration? moment) async {}
 
   @override
   Future<void> setVolume(double volume) async {}
@@ -62,13 +62,17 @@ class FakeController extends ValueNotifier<VideoPlayerValue>
   Future<void> setLooping(bool looping) async {}
 
   @override
-  VideoFormat get formatHint => null;
+  VideoFormat? get formatHint => null;
 
   @override
   Future<ClosedCaptionFile> get closedCaptionFile => _loadClosedCaption();
 
   @override
-  VideoPlayerOptions get videoPlayerOptions => null;
+  VideoPlayerOptions? get videoPlayerOptions => null;
+
+  @override
+  // TODO: implement isDefaultAudioConfigurationEnabled
+  get isDefaultAudioConfigurationEnabled => throw UnimplementedError();
 }
 
 Future<ClosedCaptionFile> _loadClosedCaption() async =>
@@ -133,8 +137,8 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: ClosedCaption(text: text)));
 
       final Text textWidget = tester.widget<Text>(find.text(text));
-      expect(textWidget.style.fontSize, 36.0);
-      expect(textWidget.style.color, Colors.white);
+      expect(textWidget.style!.fontSize, 36.0);
+      expect(textWidget.style!.color, Colors.white);
     });
 
     testWidgets('uses given text and style', (WidgetTester tester) async {
@@ -149,7 +153,7 @@ void main() {
       expect(find.text(text), findsOneWidget);
 
       final Text textWidget = tester.widget<Text>(find.text(text));
-      expect(textWidget.style.fontSize, textStyle.fontSize);
+      expect(textWidget.style!.fontSize, textStyle.fontSize);
     });
 
     testWidgets('handles null text', (WidgetTester tester) async {
@@ -173,7 +177,7 @@ void main() {
   });
 
   group('VideoPlayerController', () {
-    FakeVideoPlayerPlatform fakeVideoPlayerPlatform;
+    late FakeVideoPlayerPlatform fakeVideoPlayerPlatform;
 
     setUp(() {
       fakeVideoPlayerPlatform = FakeVideoPlayerPlatform();
@@ -187,8 +191,8 @@ void main() {
         await controller.initialize();
 
         expect(
-            fakeVideoPlayerPlatform.dataSourceDescriptions[0].asset, 'a.avi');
-        expect(fakeVideoPlayerPlatform.dataSourceDescriptions[0].packageName,
+            fakeVideoPlayerPlatform.dataSourceDescriptions[0]!.asset, 'a.avi');
+        expect(fakeVideoPlayerPlatform.dataSourceDescriptions[0]!.packageName,
             null);
       });
 
@@ -198,10 +202,10 @@ void main() {
         );
         await controller.initialize();
 
-        expect(fakeVideoPlayerPlatform.dataSourceDescriptions[0].uri,
+        expect(fakeVideoPlayerPlatform.dataSourceDescriptions[0]!.uri,
             'https://127.0.0.1');
         expect(
-            fakeVideoPlayerPlatform.dataSourceDescriptions[0].formatHint, null);
+            fakeVideoPlayerPlatform.dataSourceDescriptions[0]!.formatHint, null);
       });
 
       test('network with hint', () async {
@@ -210,9 +214,9 @@ void main() {
             formatHint: VideoFormat.dash);
         await controller.initialize();
 
-        expect(fakeVideoPlayerPlatform.dataSourceDescriptions[0].uri,
+        expect(fakeVideoPlayerPlatform.dataSourceDescriptions[0]!.uri,
             'https://127.0.0.1');
-        expect(fakeVideoPlayerPlatform.dataSourceDescriptions[0].formatHint,
+        expect(fakeVideoPlayerPlatform.dataSourceDescriptions[0]!.formatHint,
             'dash');
       });
 
@@ -221,7 +225,7 @@ void main() {
           'http://testing.com/invalid_url',
         );
         try {
-          dynamic error;
+          late dynamic error;
           fakeVideoPlayerPlatform.forceInitError = true;
           await controller.initialize().catchError((dynamic e) => error = e);
           final PlatformException platformEx = error;
@@ -236,7 +240,7 @@ void main() {
             VideoPlayerController.file(File('a.avi'));
         await controller.initialize();
 
-        expect(fakeVideoPlayerPlatform.dataSourceDescriptions[0].uri,
+        expect(fakeVideoPlayerPlatform.dataSourceDescriptions[0]!.uri,
             'file://a.avi');
       });
     });
@@ -419,7 +423,7 @@ void main() {
         await controller.play();
         expect(controller.value.isPlaying, isTrue);
         final FakeVideoEventStream fakeVideoEventStream =
-            fakeVideoPlayerPlatform.streams[controller.textureId];
+            fakeVideoPlayerPlatform.streams[controller.textureId!]!;
         assert(fakeVideoEventStream != null);
 
         fakeVideoEventStream.eventsChannel
@@ -438,7 +442,7 @@ void main() {
         expect(controller.value.isBuffering, false);
         expect(controller.value.buffered, isEmpty);
         final FakeVideoEventStream fakeVideoEventStream =
-            fakeVideoPlayerPlatform.streams[controller.textureId];
+            fakeVideoPlayerPlatform.streams[controller.textureId!]!;
         assert(fakeVideoEventStream != null);
 
         fakeVideoEventStream.eventsChannel
@@ -646,7 +650,7 @@ void main() {
         File(''),
         videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true));
     await controller.initialize();
-    expect(controller.videoPlayerOptions.mixWithOthers, true);
+    expect(controller.videoPlayerOptions!.mixWithOthers, true);
   });
 }
 
@@ -657,14 +661,14 @@ class FakeVideoPlayerPlatform extends TestHostVideoPlayerApi {
 
   Completer<bool> initialized = Completer<bool>();
   List<String> calls = <String>[];
-  List<CreateMessage> dataSourceDescriptions = <CreateMessage>[];
+  List<CreateMessage?> dataSourceDescriptions = <CreateMessage?>[];
   final Map<int, FakeVideoEventStream> streams = <int, FakeVideoEventStream>{};
   bool forceInitError = false;
   int nextTextureId = 0;
-  final Map<int, Duration> _positions = <int, Duration>{};
+  final Map<int?, Duration> _positions = <int?, Duration>{};
 
   @override
-  TextureMessage create(CreateMessage arg) {
+  TextureMessage create(CreateMessage? arg) {
     calls.add('create');
     streams[nextTextureId] = FakeVideoEventStream(
         nextTextureId, 100, 100, const Duration(seconds: 1), forceInitError);
@@ -675,7 +679,7 @@ class FakeVideoPlayerPlatform extends TestHostVideoPlayerApi {
   }
 
   @override
-  void dispose(TextureMessage arg) {
+  void dispose(TextureMessage? arg) {
     calls.add('dispose');
   }
 
@@ -686,46 +690,46 @@ class FakeVideoPlayerPlatform extends TestHostVideoPlayerApi {
   }
 
   @override
-  void pause(TextureMessage arg) {
+  void pause(TextureMessage? arg) {
     calls.add('pause');
   }
 
   @override
-  void play(TextureMessage arg) {
+  void play(TextureMessage? arg) {
     calls.add('play');
   }
 
   @override
-  PositionMessage position(TextureMessage arg) {
+  PositionMessage position(TextureMessage? arg) {
     calls.add('position');
     final Duration position =
-        _positions[arg.textureId] ?? const Duration(seconds: 0);
+        _positions[arg!.textureId] ?? const Duration(seconds: 0);
     return PositionMessage()..position = position.inMilliseconds;
   }
 
   @override
-  void seekTo(PositionMessage arg) {
+  void seekTo(PositionMessage? arg) {
     calls.add('seekTo');
-    _positions[arg.textureId] = Duration(milliseconds: arg.position);
+    _positions[arg!.textureId] = Duration(milliseconds: arg.position!);
   }
 
   @override
-  void setLooping(LoopingMessage arg) {
+  void setLooping(LoopingMessage? arg) {
     calls.add('setLooping');
   }
 
   @override
-  void setVolume(VolumeMessage arg) {
+  void setVolume(VolumeMessage? arg) {
     calls.add('setVolume');
   }
 
   @override
-  void setPlaybackSpeed(PlaybackSpeedMessage arg) {
+  void setPlaybackSpeed(PlaybackSpeedMessage? arg) {
     calls.add('setPlaybackSpeed');
   }
 
   @override
-  void setMixWithOthers(MixWithOthersMessage arg) {
+  void setMixWithOthers(MixWithOthersMessage? arg) {
     calls.add('setMixWithOthers');
   }
 }
@@ -742,7 +746,7 @@ class FakeVideoEventStream {
   int height;
   Duration duration;
   bool initWithError;
-  FakeEventsChannel eventsChannel;
+  late FakeEventsChannel eventsChannel;
 
   void onListen() {
     if (!initWithError) {
@@ -764,7 +768,7 @@ class FakeEventsChannel {
     eventsMethodChannel.setMockMethodCallHandler(onMethodCall);
   }
 
-  MethodChannel eventsMethodChannel;
+  late MethodChannel eventsMethodChannel;
   VoidCallback onListen;
 
   Future<dynamic> onMethodCall(MethodCall call) {
@@ -780,7 +784,7 @@ class FakeEventsChannel {
     _sendMessage(const StandardMethodCodec().encodeSuccessEnvelope(event));
   }
 
-  void sendError(String code, [String message, dynamic details]) {
+  void sendError(String code, [String? message, dynamic details]) {
     _sendMessage(const StandardMethodCodec().encodeErrorEnvelope(
       code: code,
       message: message,
@@ -793,7 +797,7 @@ class FakeEventsChannel {
     // with `ServicesBinding.instance.defaultBinaryMessenger` when it's
     // available on all the versions of Flutter that we test.
     // ignore: deprecated_member_use
-    defaultBinaryMessenger.handlePlatformMessage(
-        eventsMethodChannel.name, data, (ByteData data) {});
+    // defaultBinaryMessenger.handlePlatformMessage(
+    //     eventsMethodChannel.name, data, (ByteData data) {});
   }
 }

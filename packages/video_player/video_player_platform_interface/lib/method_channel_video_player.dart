@@ -26,7 +26,7 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
   }
 
   @override
-  Future<int> create(
+  Future<int?> create(
       DataSource dataSource, bool isDefaultAudioConfigurationEnabled) async {
     CreateMessage message = CreateMessage();
 
@@ -37,16 +37,18 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
         break;
       case DataSourceType.network:
         message.uri = dataSource.uri;
-        message.formatHint = _videoFormatStringMap[dataSource.formatHint];
+        message.formatHint =
+            _videoFormatStringMap[dataSource.formatHint ?? VideoFormat.other];
         break;
       case DataSourceType.file:
         message.uri = dataSource.uri;
         break;
     }
 
-    TextureMessage response =
-        await _api.create(message, isDefaultAudioConfigurationEnabled);
-    return response.textureId;
+    TextureMessage? response =
+        await (_api.create(message, isDefaultAudioConfigurationEnabled)
+            as Future<TextureMessage?>);
+    return response!.textureId;
   }
 
   @override
@@ -92,8 +94,9 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
   @override
   Future<Duration> getPosition(int textureId) async {
     PositionMessage response =
-        await _api.position(TextureMessage()..textureId = textureId);
-    return Duration(milliseconds: response.position);
+        await (_api.position(TextureMessage()..textureId = textureId)
+            as FutureOr<PositionMessage>);
+    return Duration(milliseconds: response.position!);
   }
 
   @override
