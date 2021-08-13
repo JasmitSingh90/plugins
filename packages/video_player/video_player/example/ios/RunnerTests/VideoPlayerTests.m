@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@import video_player;
+@import video_player_custom;
 @import XCTest;
 
 @interface VideoPlayerTests : XCTestCase

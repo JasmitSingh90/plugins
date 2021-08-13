@@ -540,7 +540,7 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
                                      httpHeaders:input.httpHeaders];
     return [self onPlayerSetup:player frameUpdater:frameUpdater];
   } else {
-    *error = [FlutterError errorWithCode:@"video_player" message:@"not implemented" details:nil];
+    *error = [FlutterError errorWithCode:@"video_player_custom" message:@"not implemented" details:nil];
     return nil;
   }
 }
