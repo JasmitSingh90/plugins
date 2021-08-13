@@ -10,6 +10,6 @@ public class VideoPlayerTest {
   // This is only a placeholder test and doesn't actually initialize the plugin.
   @Test
   public void initPluginDoesNotThrow() {
-    final VideoPlayerPlugin plugin = new VideoPlayerPlugin();
+    final VideoPlayerPluginCustom plugin = new VideoPlayerPluginCustom();
   }
 }

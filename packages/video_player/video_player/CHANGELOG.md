@@ -128,7 +128,7 @@
 
 ## 0.10.12+3
 
-* Avoiding uses or overrides a deprecated API in `VideoPlayerPlugin` class.
+* Avoiding uses or overrides a deprecated API in `VideoPlayerPluginCustom` class.
 
 ## 0.10.12+2
 

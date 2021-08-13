@@ -37,10 +37,10 @@ const String _kDefaultErrorMessage =
 /// The web implementation of [VideoPlayerPlatform].
 ///
 /// This class implements the `package:video_player` functionality for the web.
-class VideoPlayerPlugin extends VideoPlayerPlatform {
+class VideoPlayerPluginCustom extends VideoPlayerPlatform {
   /// Registers this class as the default instance of [VideoPlayerPlatform].
   static void registerWith(Registrar registrar) {
-    VideoPlayerPlatform.instance = VideoPlayerPlugin();
+    VideoPlayerPlatform.instance = VideoPlayerPluginCustom();
   }
 
   Map<int, _VideoPlayer> _videoPlayers = <int, _VideoPlayer>{};

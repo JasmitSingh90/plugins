@@ -14,9 +14,9 @@ flutter:
     platforms:
       android:
         package: io.flutter.plugins.videoplayer
-        pluginClass: VideoPlayerPlugin
+        pluginClass: VideoPlayerPluginCustom
       ios:
-        pluginClass: FLTVideoPlayerPlugin
+        pluginClass: FLTVideoPlayerPluginCustom
       web:
         default_package: video_player_web
 

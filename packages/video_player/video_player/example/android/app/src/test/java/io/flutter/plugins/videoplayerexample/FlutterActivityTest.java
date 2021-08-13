@@ -15,7 +15,7 @@ import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
-import io.flutter.plugins.videoplayer.VideoPlayerPlugin;
+import io.flutter.plugins.videoplayer.VideoPlayerPluginCustom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -29,7 +29,7 @@ public class FlutterActivityTest {
 
   @Test
   public void disposeAllPlayers() {
-    VideoPlayerPlugin videoPlayerPlugin = spy(new VideoPlayerPlugin());
+    VideoPlayerPluginCustom videoPlayerPlugin = spy(new VideoPlayerPluginCustom());
     FlutterLoader flutterLoader = mock(FlutterLoader.class);
     FlutterJNI flutterJNI = mock(FlutterJNI.class);
     ArgumentCaptor<FlutterPlugin.FlutterPluginBinding> pluginBindingCaptor =

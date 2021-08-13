@@ -12,7 +12,7 @@ flutter:
   plugin:
     platforms:
       web:
-        pluginClass: VideoPlayerPlugin
+        pluginClass: VideoPlayerPluginCustom
         fileName: video_player_web.dart
 
 dependencies:

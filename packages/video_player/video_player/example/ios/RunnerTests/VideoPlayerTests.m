@@ -11,7 +11,7 @@
 @implementation VideoPlayerTests
 
 - (void)testPlugin {
-  FLTVideoPlayerPlugin* plugin = [[FLTVideoPlayerPlugin alloc] init];
+  FLTVideoPlayerPluginCustom* plugin = [[FLTVideoPlayerPluginCustom alloc] init];
   XCTAssertNotNil(plugin);
 }
 
