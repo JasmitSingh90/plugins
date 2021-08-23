@@ -1,11 +1,38 @@
-## 5.0.0-nullsafety.1
+## 5.0.7
 
-* Document that the web plugin is not endorsed in the `nullsafety` prerelease for now.
+* Mark iOS arm64 simulators as unsupported.
 
-## 5.0.0-nullsafety
+## 5.0.6
 
-* Migrate to nnbd.
-* **Breaking change**: web plugins aren't endorsed in null-safe plugins yet.
+* Remove references to the Android V1 embedding.
+
+## 5.0.5
+
+* Add iOS unit and UI integration test targets.
+* Add iOS unit test module map.
+* Exclude arm64 simulators in example app.
+
+## 5.0.4
+
+* Migrate maven repo from jcenter to mavenCentral.
+
+## 5.0.3
+
+* Fixed links in `README.md`.
+* Added documentation for usage on the web.
+
+## 5.0.2
+
+* Fix flutter/flutter#48602 iOS flow shows account selection, if user is signed in to Google on the device.
+
+## 5.0.1
+
+* Update platforms `init` function to prioritize `clientId` property when available;
+* Updates `google_sign_in_platform_interface` version.
+
+## 5.0.0
+
+* Migrate to null safety.
 
 ## 4.5.9
 

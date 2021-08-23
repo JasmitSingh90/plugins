@@ -1,12 +1,8 @@
-## 1.1.0-nullsafety.2
+## 2.0.1
 
-* Use Mockito null safe.
+* Fix `federated flutter plugins` link in the README.md.
 
-## 1.1.0-nullsafety.1
-
-* Bump Dart SDK to support null safety.
-
-## 1.1.0-nullsafety
+## 2.0.0
 
 * Migrate to null safety.
 
