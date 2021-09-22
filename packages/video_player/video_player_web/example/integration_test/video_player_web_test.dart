@@ -21,12 +21,12 @@ void main() {
       VideoPlayerPlatform.instance = VideoPlayerPlugin();
       textureId = VideoPlayerPlatform.instance
           .create(
-            DataSource(
-              sourceType: DataSourceType.network,
-              uri:
-                  'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
-            ),
-          )
+              DataSource(
+                sourceType: DataSourceType.network,
+                uri:
+                    'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
+              ),
+              false)
           .then((textureId) => textureId!);
     });
 
@@ -37,34 +37,34 @@ void main() {
     testWidgets('can create from network', (WidgetTester tester) async {
       expect(
           VideoPlayerPlatform.instance.create(
-            DataSource(
-                sourceType: DataSourceType.network,
-                uri:
-                    'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4'),
-          ),
+              DataSource(
+                  sourceType: DataSourceType.network,
+                  uri:
+                      'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4'),
+              false),
           completion(isNonZero));
     });
 
     testWidgets('can create from asset', (WidgetTester tester) async {
       expect(
           VideoPlayerPlatform.instance.create(
-            DataSource(
-              sourceType: DataSourceType.asset,
-              asset: 'videos/bee.mp4',
-              package: 'bee_vids',
-            ),
-          ),
+              DataSource(
+                sourceType: DataSourceType.asset,
+                asset: 'videos/bee.mp4',
+                package: 'bee_vids',
+              ),
+              false),
           completion(isNonZero));
     });
 
     testWidgets('cannot create from file', (WidgetTester tester) async {
       expect(
           VideoPlayerPlatform.instance.create(
-            DataSource(
-              sourceType: DataSourceType.file,
-              uri: '/videos/bee.mp4',
-            ),
-          ),
+              DataSource(
+                sourceType: DataSourceType.file,
+                uri: '/videos/bee.mp4',
+              ),
+              false),
           throwsUnimplementedError);
     });
 
@@ -88,11 +88,11 @@ void main() {
     testWidgets('throws PlatformException when playing bad media',
         (WidgetTester tester) async {
       int videoPlayerId = (await VideoPlayerPlatform.instance.create(
-        DataSource(
-            sourceType: DataSourceType.network,
-            uri:
-                'https://flutter.github.io/assets-for-api-docs/assets/videos/_non_existent_video.mp4'),
-      ))!;
+          DataSource(
+              sourceType: DataSourceType.network,
+              uri:
+                  'https://flutter.github.io/assets-for-api-docs/assets/videos/_non_existent_video.mp4'),
+          false))!;
 
       Stream<VideoEvent> eventStream =
           VideoPlayerPlatform.instance.videoEventsFor(videoPlayerId);
