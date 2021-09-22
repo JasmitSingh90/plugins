@@ -66,7 +66,8 @@ abstract class VideoPlayerPlatform {
   }
 
   /// Creates an instance of a video player and returns its textureId.
-  Future<int?> create(DataSource dataSource) {
+  Future<int?> create(
+      DataSource dataSource, bool isDefaultAudioConfigurationEnabled) {
     throw UnimplementedError('create() has not been implemented.');
   }
 
@@ -118,12 +119,6 @@ abstract class VideoPlayerPlatform {
   /// Sets the audio mode to mix with other sources
   Future<void> setMixWithOthers(bool mixWithOthers) {
     throw UnimplementedError('setMixWithOthers() has not been implemented.');
-  }
-
-  Future<void> setIOSDefaultAudioSessionConfiguration(
-      bool isDefaultAudioConfigurationEnabled) {
-    throw UnimplementedError(
-        'isDefaultAudioConfigurationEnabled() has not been implemented.');
   }
 
   // This method makes sure that VideoPlayer isn't implemented with `implements`.
@@ -358,14 +353,8 @@ class DurationRange {
 class VideoPlayerOptions {
   /// Set this to true to mix the video players audio with other audio sources.
   /// The default value is false
-  ///
-  /// Note: This option will be silently ignored in the web platform (there is
-  /// currently no way to implement this feature in this platform).
   final bool mixWithOthers;
-  final bool isDefaultAudioConfigurationEnabled;
 
   /// set additional optional player settings
-  VideoPlayerOptions(
-      {this.mixWithOthers = false,
-      this.isDefaultAudioConfigurationEnabled = true});
+  VideoPlayerOptions({this.mixWithOthers = false});
 }

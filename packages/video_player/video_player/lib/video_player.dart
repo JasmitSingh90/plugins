@@ -184,7 +184,10 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   /// null. The [package] argument must be non-null when the asset comes from a
   /// package and null otherwise.
   VideoPlayerController.asset(this.dataSource,
-      {this.package, this.closedCaptionFile, this.videoPlayerOptions})
+      {this.package,
+      this.closedCaptionFile,
+      this.videoPlayerOptions,
+      this.isDefaultAudioConfigurationEnabled = true})
       : dataSourceType = DataSourceType.asset,
         formatHint = null,
         httpHeaders = const {},
@@ -199,13 +202,13 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   /// the video format detection code.
   /// [httpHeaders] option allows to specify HTTP headers
   /// for the request to the [dataSource].
-  VideoPlayerController.network(
-    this.dataSource, {
-    this.formatHint,
-    this.closedCaptionFile,
-    this.videoPlayerOptions,
-    this.httpHeaders = const {},
-  })  : dataSourceType = DataSourceType.network,
+  VideoPlayerController.network(this.dataSource,
+      {this.formatHint,
+      this.closedCaptionFile,
+      this.videoPlayerOptions,
+      this.httpHeaders = const {},
+      this.isDefaultAudioConfigurationEnabled = true})
+      : dataSourceType = DataSourceType.network,
         package = null,
         super(VideoPlayerValue(duration: Duration.zero));
 
@@ -214,13 +217,17 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   /// This will load the file from the file-URI given by:
   /// `'file://${file.path}'`.
   VideoPlayerController.file(File file,
-      {this.closedCaptionFile, this.videoPlayerOptions})
+      {this.closedCaptionFile,
+      this.videoPlayerOptions,
+      this.isDefaultAudioConfigurationEnabled = true})
       : dataSource = 'file://${file.path}',
         dataSourceType = DataSourceType.file,
         package = null,
         formatHint = null,
         httpHeaders = const {},
         super(VideoPlayerValue(duration: Duration.zero));
+
+  final isDefaultAudioConfigurationEnabled;
 
   /// The URI to the video file. This will be in different formats depending on
   /// the [DataSourceType] of the original video.
@@ -304,11 +311,9 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       await _videoPlayerPlatform
           .setMixWithOthers(videoPlayerOptions!.mixWithOthers);
     }
-    if (videoPlayerOptions?.isDefaultAudioConfigurationEnabled != null) {
-      await _videoPlayerPlatform.setIOSDefaultAudioSessionConfiguration(
-          videoPlayerOptions!.isDefaultAudioConfigurationEnabled);
-    }
-    _textureId = (await _videoPlayerPlatform.create(dataSourceDescription)) ??
+    // bool isDefaultAudioConfigurationEnabled = false;
+    _textureId = (await _videoPlayerPlatform.create(
+            dataSourceDescription, isDefaultAudioConfigurationEnabled)) ??
         kUninitializedTextureId;
     _creatingCompleter!.complete(null);
     final Completer<void> initializingCompleter = Completer<void>();

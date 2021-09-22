@@ -26,7 +26,8 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
   }
 
   @override
-  Future<int?> create(DataSource dataSource) async {
+  Future<int?> create(
+      DataSource dataSource, bool isDefaultAudioConfigurationEnabled) async {
     CreateMessage message = CreateMessage();
 
     switch (dataSource.sourceType) {
@@ -44,7 +45,8 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
         break;
     }
 
-    TextureMessage response = await _api.create(message);
+    TextureMessage response =
+        await _api.create(message, isDefaultAudioConfigurationEnabled);
     return response.textureId;
   }
 
@@ -139,16 +141,6 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
   Future<void> setMixWithOthers(bool mixWithOthers) {
     return _api.setMixWithOthers(
       MixWithOthersMessage()..mixWithOthers = mixWithOthers,
-    );
-  }
-
-  @override
-  Future<void> setIOSDefaultAudioSessionConfiguration(
-      bool isDefaultAudioConfigurationEnabled) {
-    return _api.setIOSDefaultAudioSessionConfiguration(
-      IOSDefaultAudioSessionConfigurationMessage()
-        ..isDefaultAudioConfigurationEnabled =
-            isDefaultAudioConfigurationEnabled,
     );
   }
 

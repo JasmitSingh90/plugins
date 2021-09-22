@@ -146,27 +146,6 @@ class MixWithOthersMessage {
   }
 }
 
-class IOSDefaultAudioSessionConfigurationMessage {
-  bool? isDefaultAudioConfigurationEnabled;
-  // ignore: unused_element
-  Map<dynamic, dynamic> _toMap() {
-    final Map<dynamic, dynamic> pigeonMap = <dynamic, dynamic>{};
-    pigeonMap['isDefaultAudioConfigurationEnabled'] =
-        isDefaultAudioConfigurationEnabled;
-    return pigeonMap;
-  }
-
-  // ignore: unused_element
-  static IOSDefaultAudioSessionConfigurationMessage _fromMap(
-      Map<dynamic, dynamic> pigeonMap) {
-    final IOSDefaultAudioSessionConfigurationMessage result =
-        IOSDefaultAudioSessionConfigurationMessage();
-    result.isDefaultAudioConfigurationEnabled =
-        pigeonMap['isDefaultAudioConfigurationEnabled'];
-    return result;
-  }
-}
-
 class VideoPlayerApi {
   Future<void> initialize() async {
     const BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
@@ -192,7 +171,8 @@ class VideoPlayerApi {
     }
   }
 
-  Future<TextureMessage> create(CreateMessage arg) async {
+  Future<TextureMessage> create(
+      CreateMessage arg, bool isDefaultAudioConfigurationEnabled) async {
     final Object encoded = arg.encode();
     const BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.VideoPlayerApi.create', StandardMessageCodec());
@@ -439,30 +419,6 @@ class VideoPlayerApi {
         message: error['message'] as String?,
         details: error['details'],
       );
-    } else {
-      // noop
-    }
-  }
-
-  Future<void> setIOSDefaultAudioSessionConfiguration(
-      IOSDefaultAudioSessionConfigurationMessage arg) async {
-    final Map<dynamic, dynamic> requestMap = arg._toMap();
-    const BasicMessageChannel<dynamic> channel = BasicMessageChannel<dynamic>(
-        'dev.flutter.pigeon.VideoPlayerApi.setIOSDefaultAudioSessionConfiguration',
-        StandardMessageCodec());
-
-    final Map<dynamic, dynamic>? replyMap = await channel.send(requestMap);
-    if (replyMap == null) {
-      throw PlatformException(
-          code: 'channel-error',
-          message: 'Unable to establish connection on channel.',
-          details: null);
-    } else if (replyMap['error'] != null) {
-      final Map<dynamic, dynamic> error = replyMap['error'];
-      throw PlatformException(
-          code: error['code'],
-          message: error['message'],
-          details: error['details']);
     } else {
       // noop
     }

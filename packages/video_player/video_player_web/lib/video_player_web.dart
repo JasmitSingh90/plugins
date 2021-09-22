@@ -66,7 +66,8 @@ class VideoPlayerPlugin extends VideoPlayerPlatform {
   }
 
   @override
-  Future<int> create(DataSource dataSource) async {
+  Future<int> create(
+      DataSource dataSource, bool isDefaultAudioConfigurationEnabled) async {
     final int textureId = _textureCounter;
     _textureCounter++;
 

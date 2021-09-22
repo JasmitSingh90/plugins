@@ -54,10 +54,6 @@ static NSDictionary<NSString *, id> *wrapResult(NSDictionary *result, FlutterErr
 + (FLTMixWithOthersMessage *)fromMap:(NSDictionary *)dict;
 - (NSDictionary *)toMap;
 @end
-@interface FLTIOSDefaultAudioSessionConfigurationMessage ()
-+ (FLTIOSDefaultAudioSessionConfigurationMessage *)fromMap:(NSDictionary *)dict;
-- (NSDictionary *)toMap;
-@end
 
 @implementation FLTTextureMessage
 + (FLTTextureMessage *)fromMap:(NSDictionary *)dict {
@@ -98,6 +94,13 @@ static NSDictionary<NSString *, id> *wrapResult(NSDictionary *result, FlutterErr
   if ((NSNull *)result.httpHeaders == [NSNull null]) {
     result.httpHeaders = nil;
   }
+
+  result.isDefaultAudioConfigurationEnabled = dict[@"isDefaultAudioConfigurationEnabled"];
+  if ((NSNull *)result.isDefaultAudioConfigurationEnabled == [NSNull null]) {
+    result.isDefaultAudioConfigurationEnabled = nil;
+  }
+
+
   return result;
 }
 - (NSDictionary *)toMap {
@@ -109,7 +112,9 @@ static NSDictionary<NSString *, id> *wrapResult(NSDictionary *result, FlutterErr
                                    (self.formatHint ? self.formatHint : [NSNull null]),
                                    @"formatHint",
                                    (self.httpHeaders ? self.httpHeaders : [NSNull null]),
-                                   @"httpHeaders", nil];
+                                   @"httpHeaders",
+                                   (self.isDefaultAudioConfigurationEnabled ? self.isDefaultAudioConfigurationEnabled : [NSNull null]),
+                                   @"isDefaultAudioConfigurationEnabled", nil];
 }
 @end
 
@@ -128,7 +133,7 @@ static NSDictionary<NSString *, id> *wrapResult(NSDictionary *result, FlutterErr
 }
 - (NSDictionary *)toMap {
   return [NSDictionary
-      dictionaryWithObjectsAndKeys:(self.textureId != nil ? self.textureId : [NSNull null]),
+        dictionaryWithObjectsAndKeys:(self.textureId != nil ? self.textureId : [NSNull null]),
                                    @"textureId",
                                    (self.isLooping != nil ? self.isLooping : [NSNull null]),
                                    @"isLooping", nil];
@@ -150,7 +155,7 @@ static NSDictionary<NSString *, id> *wrapResult(NSDictionary *result, FlutterErr
 }
 - (NSDictionary *)toMap {
   return [NSDictionary
-      dictionaryWithObjectsAndKeys:(self.textureId != nil ? self.textureId : [NSNull null]),
+            dictionaryWithObjectsAndKeys:(self.textureId != nil ? self.textureId : [NSNull null]),
                                    @"textureId", (self.volume != nil ? self.volume : [NSNull null]),
                                    @"volume", nil];
 }
@@ -171,7 +176,7 @@ static NSDictionary<NSString *, id> *wrapResult(NSDictionary *result, FlutterErr
 }
 - (NSDictionary *)toMap {
   return [NSDictionary
-      dictionaryWithObjectsAndKeys:(self.textureId != nil ? self.textureId : [NSNull null]),
+            dictionaryWithObjectsAndKeys:(self.textureId != nil ? self.textureId : [NSNull null]),
                                    @"textureId", (self.speed != nil ? self.speed : [NSNull null]),
                                    @"speed", nil];
 }
@@ -192,7 +197,7 @@ static NSDictionary<NSString *, id> *wrapResult(NSDictionary *result, FlutterErr
 }
 - (NSDictionary *)toMap {
   return [NSDictionary
-      dictionaryWithObjectsAndKeys:(self.textureId != nil ? self.textureId : [NSNull null]),
+            dictionaryWithObjectsAndKeys:(self.textureId != nil ? self.textureId : [NSNull null]),
                                    @"textureId",
                                    (self.position != nil ? self.position : [NSNull null]),
                                    @"position", nil];
@@ -214,24 +219,6 @@ static NSDictionary<NSString *, id> *wrapResult(NSDictionary *result, FlutterErr
                                    @"mixWithOthers", nil];
 }
 @end
-
-@implementation FLTIOSDefaultAudioSessionConfigurationMessage
-+ (FLTIOSDefaultAudioSessionConfigurationMessage *)fromMap:(NSDictionary *)dict {
-  FLTIOSDefaultAudioSessionConfigurationMessage *result = [[FLTIOSDefaultAudioSessionConfigurationMessage alloc] init];
-  result.isDefaultAudioConfigurationEnabled = dict[@"isDefaultAudioConfigurationEnabled"];
-  if ((NSNull *)result.isDefaultAudioConfigurationEnabled == [NSNull null]) {
-    result.isDefaultAudioConfigurationEnabled = nil;
-  }
-  return result;
-}
-- (NSDictionary *)toMap {
-  return [NSDictionary
-      dictionaryWithObjectsAndKeys:(self.isDefaultAudioConfigurationEnabled ? self.isDefaultAudioConfigurationEnabled : [NSNull null]),
-                                   @"isDefaultAudioConfigurationEnabled", nil];
-}
-@end
-
-
 
 void FLTVideoPlayerApiSetup(id<FlutterBinaryMessenger> binaryMessenger, id<FLTVideoPlayerApi> api) {
   {
@@ -392,21 +379,6 @@ void FLTVideoPlayerApiSetup(id<FlutterBinaryMessenger> binaryMessenger, id<FLTVi
         FLTMixWithOthersMessage *input = [FLTMixWithOthersMessage fromMap:message];
         FlutterError *error;
         [api setMixWithOthers:input error:&error];
-        callback(wrapResult(nil, error));
-      }];
-    } else {
-      [channel setMessageHandler:nil];
-    }
-  }
-  {
-    FlutterBasicMessageChannel *channel = [FlutterBasicMessageChannel
-        messageChannelWithName:@"dev.flutter.pigeon.VideoPlayerApi.setIOSDefaultAudioSessionConfiguration"
-               binaryMessenger:binaryMessenger];
-    if (api) {
-      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
-        FlutterError *error;
-        FLTIOSDefaultAudioSessionConfigurationMessage *input = [FLTIOSDefaultAudioSessionConfigurationMessage fromMap:message];
-        [api setIOSDefaultAudioSessionConfiguration:input error:&error];
         callback(wrapResult(nil, error));
       }];
     } else {

@@ -18,7 +18,6 @@ NS_ASSUME_NONNULL_BEGIN
 @class FLTPlaybackSpeedMessage;
 @class FLTPositionMessage;
 @class FLTMixWithOthersMessage;
-@class FLTIOSDefaultAudioSessionConfigurationMessage;
 
 @interface FLTTextureMessage : NSObject
 @property(nonatomic, strong, nullable) NSNumber *textureId;
@@ -29,6 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, copy, nullable) NSString *uri;
 @property(nonatomic, copy, nullable) NSString *packageName;
 @property(nonatomic, copy, nullable) NSString *formatHint;
+@property(nonatomic, copy, nullable) NSNumber *isDefaultAudioConfigurationEnabled;
 @property(nonatomic, strong, nullable) NSDictionary *httpHeaders;
 @end
 
@@ -56,10 +56,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, strong, nullable) NSNumber *mixWithOthers;
 @end
 
-@interface FLTIOSDefaultAudioSessionConfigurationMessage : NSObject
-@property(nonatomic, strong, nullable) NSNumber *isDefaultAudioConfigurationEnabled;
-@end
-
 @protocol FLTVideoPlayerApi
 - (void)initialize:(FlutterError *_Nullable *_Nonnull)error;
 - (nullable FLTTextureMessage *)create:(FLTCreateMessage *)input
@@ -76,8 +72,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)pause:(FLTTextureMessage *)input error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)setMixWithOthers:(FLTMixWithOthersMessage *)input
                    error:(FlutterError *_Nullable *_Nonnull)error;
-- (void)setIOSDefaultAudioSessionConfiguration:(FLTIOSDefaultAudioSessionConfigurationMessage *)input
-                   error:(FlutterError *_Nullable *_Nonnull)error;                           
 @end
 
 extern void FLTVideoPlayerApiSetup(id<FlutterBinaryMessenger> binaryMessenger,

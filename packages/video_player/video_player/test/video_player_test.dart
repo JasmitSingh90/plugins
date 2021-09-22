@@ -71,6 +71,9 @@ class FakeController extends ValueNotifier<VideoPlayerValue>
 
   @override
   VideoPlayerOptions? get videoPlayerOptions => null;
+
+  @override
+  get isDefaultAudioConfigurationEnabled => false;
 }
 
 Future<ClosedCaptionFile> _loadClosedCaption() async =>
