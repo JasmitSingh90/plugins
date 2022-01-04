@@ -1,3 +1,72 @@
+## NEXT
+
+* Updates Android compileSdkVersion to 31.
+
+## 2.1.1
+
+* Suppresses unchecked cast warning.
+
+## 2.1.0
+
+* Add iOS unit and UI integration test targets.
+* Provide access to Hybrid Composition on Android through the `GoogleMap` widget.
+
+## 2.0.11
+
+* Add additional marker drag events.
+
+## 2.0.10
+
+* Update minimum Flutter SDK to 2.5 and iOS deployment target to 9.0.
+
+## 2.0.9
+
+* Fix Android `NullPointerException` caused by the `GoogleMapController` being disposed before `GoogleMap` was ready.
+
+## 2.0.8
+
+* Mark iOS arm64 simulators as unsupported.
+
+## 2.0.7
+
+* Add iOS unit and UI integration test targets.
+* Exclude arm64 simulators in example app.
+* Remove references to the Android V1 embedding.
+
+## 2.0.6
+
+* Migrate maven repo from jcenter to mavenCentral.
+
+## 2.0.5
+
+* Google Maps requires at least Android SDK 20.
+
+## 2.0.4
+
+* Unpin iOS GoogleMaps pod dependency version.
+
+## 2.0.3
+
+* Fix incorrect typecast in TileOverlay example.
+* Fix english wording in instructions.
+
+## 2.0.2
+
+* Update flutter\_plugin\_android\_lifecycle dependency to 2.0.1 to fix an R8 issue
+  on some versions.
+
+## 2.0.1
+
+* Update platform\_plugin\_interface version requirement.
+
+## 2.0.0
+
+* Migrate to null-safety
+* BREAKING CHANGE: Passing an unknown map object ID (e.g., MarkerId) to a
+  method, it will throw an `UnknownMapObjectIDError`. Previously it would
+  either silently do nothing, or throw an error trying to call a function on
+  `null`, depneding on the method.
+
 ## 1.2.0
 
 * Support custom tiles.

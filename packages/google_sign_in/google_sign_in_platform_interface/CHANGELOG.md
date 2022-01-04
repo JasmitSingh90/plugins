@@ -1,6 +1,14 @@
-## 2.0.0-nullsafety
+## 2.1.0
 
-* Migration to nnbd.
+* Add serverAuthCode attribute to user data
+
+## 2.0.1
+
+* Updates `init` function in `MethodChannelGoogleSignIn` to parametrize `clientId` property.
+
+## 2.0.0
+
+* Migrate to null-safety.
 
 ## 1.1.3
 

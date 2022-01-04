@@ -1,13 +1,10 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:meta/meta.dart' show visibleForTesting;
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'method_channel_video_player.dart';
 
@@ -18,37 +15,24 @@ import 'method_channel_video_player.dart';
 /// (using `extends`) ensures that the subclass will get the default implementation, while
 /// platform implementations that `implements` this interface will be broken by newly added
 /// [VideoPlayerPlatform] methods.
-abstract class VideoPlayerPlatform {
-  /// Only mock implementations should set this to true.
-  ///
-  /// Mockito mocks are implementing this class with `implements` which is forbidden for anything
-  /// other than mocks (see class docs). This property provides a backdoor for mockito mocks to
-  /// skip the verification that the class isn't implemented with `implements`.
-  @visibleForTesting
-  bool get isMock => false;
+abstract class VideoPlayerPlatform extends PlatformInterface {
+  /// Constructs a VideoPlayerPlatform.
+  VideoPlayerPlatform() : super(token: _token);
+
+  static final Object _token = Object();
 
   static VideoPlayerPlatform _instance = MethodChannelVideoPlayer();
 
   /// The default instance of [VideoPlayerPlatform] to use.
   ///
-  /// Platform-specific plugins should override this with their own
-  /// platform-specific class that extends [VideoPlayerPlatform] when they
-  /// register themselves.
-  ///
   /// Defaults to [MethodChannelVideoPlayer].
   static VideoPlayerPlatform get instance => _instance;
 
-  // TODO(amirh): Extract common platform interface logic.
-  // https://github.com/flutter/flutter/issues/43368
+  /// Platform-specific plugins should override this with their own
+  /// platform-specific class that extends [VideoPlayerPlatform] when they
+  /// register themselves.
   static set instance(VideoPlayerPlatform instance) {
-    if (!instance.isMock) {
-      try {
-        instance._verifyProvidesDefaultImplementations();
-      } on NoSuchMethodError catch (_) {
-        throw AssertionError(
-            'Platform interfaces must not be implemented with `implements`');
-      }
-    }
+    PlatformInterface.verifyToken(instance, _token);
     _instance = instance;
   }
 
@@ -119,14 +103,6 @@ abstract class VideoPlayerPlatform {
   Future<void> setMixWithOthers(bool mixWithOthers) {
     throw UnimplementedError('setMixWithOthers() has not been implemented.');
   }
-
-  // This method makes sure that VideoPlayer isn't implemented with `implements`.
-  //
-  // See class doc for more details on why implementing this class is forbidden.
-  //
-  // This private method is called by the instance setter, which fails if the class is
-  // implemented with `implements`.
-  void _verifyProvidesDefaultImplementations() {}
 }
 
 /// Description of the data source used to create an instance of
@@ -151,6 +127,7 @@ class DataSource {
     this.formatHint,
     this.asset,
     this.package,
+    this.httpHeaders = const {},
   });
 
   /// The way in which the video was originally loaded.
@@ -168,6 +145,11 @@ class DataSource {
   /// **Android only**. Will override the platform's generic file format
   /// detection with whatever is set here.
   final VideoFormat? formatHint;
+
+  /// HTTP headers used for the request to the [uri].
+  /// Only for [DataSourceType.network] videos.
+  /// Always empty for other video types.
+  Map<String, String> httpHeaders;
 
   /// The name of the asset. Only set for [DataSourceType.asset] videos.
   final String? asset;
@@ -190,6 +172,9 @@ enum DataSourceType {
 
   /// The video was loaded off of the local filesystem.
   file,
+
+  /// The video is available via contentUri. Android only.
+  contentUri,
 }
 
 /// The file format of the given video.
@@ -346,6 +331,9 @@ class DurationRange {
 class VideoPlayerOptions {
   /// Set this to true to mix the video players audio with other audio sources.
   /// The default value is false
+  ///
+  /// Note: This option will be silently ignored in the web platform (there is
+  /// currently no way to implement this feature in this platform).
   final bool mixWithOthers;
 
   /// set additional optional player settings

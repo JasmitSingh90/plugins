@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -32,7 +32,7 @@ void setMockPathProviderPlatform(Platform platform) {
 class LocalAuthentication {
   /// The `authenticateWithBiometrics` method has been deprecated.
   /// Use `authenticate` with `biometricOnly: true` instead
-  @Deprecated("Use `authenticate` with `biometricOnly: true` instead")
+  @Deprecated('Use `authenticate` with `biometricOnly: true` instead')
   Future<bool> authenticateWithBiometrics({
     required String localizedReason,
     bool useErrorDialogs = true,
@@ -59,7 +59,7 @@ class LocalAuthentication {
   ///
   /// [localizedReason] is the message to show to user while prompting them
   /// for authentication. This is typically along the lines of: 'Please scan
-  /// your finger to access MyApp.'
+  /// your finger to access MyApp.'. This must not be empty.
   ///
   /// [useErrorDialogs] = true means the system will attempt to handle user
   /// fixable issues encountered while authenticating. For instance, if
@@ -100,7 +100,8 @@ class LocalAuthentication {
     bool sensitiveTransaction = true,
     bool biometricOnly = false,
   }) async {
-    assert(localizedReason != null);
+    assert(localizedReason.isNotEmpty);
+
     final Map<String, Object> args = <String, Object>{
       'localizedReason': localizedReason,
       'useErrorDialogs': useErrorDialogs,
@@ -159,9 +160,9 @@ class LocalAuthentication {
     final List<String> result = (await _channel.invokeListMethod<String>(
           'getAvailableBiometrics',
         )) ??
-        [];
+        <String>[];
     final List<BiometricType> biometrics = <BiometricType>[];
-    result.forEach((String value) {
+    for (final String value in result) {
       switch (value) {
         case 'face':
           biometrics.add(BiometricType.face);
@@ -175,7 +176,7 @@ class LocalAuthentication {
         case 'undefined':
           break;
       }
-    });
+    }
     return biometrics;
   }
 }

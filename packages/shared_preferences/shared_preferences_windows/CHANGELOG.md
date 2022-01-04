@@ -1,5 +1,18 @@
+## 2.0.3
 
-## 0.0.3-nullsafety
+* Removed obsolete `pluginClass: none` from pubpsec.
+* Fixes newly enabled analyzer options.
+
+## 2.0.2
+
+* Updated installation instructions in README.
+
+## 2.0.1
+
+* Add `implements` to pubspec.yaml.
+* Add `registerWith` to the Dart main class.
+
+## 2.0.0
 
 * Migrate to null-safety.
 

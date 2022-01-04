@@ -1,14 +1,21 @@
-## 0.1.0-nullsafety.3
+## NEXT
 
-* Update the example app: remove the deprecated `RaisedButton` and `FlatButton` widgets.
+* Updates code for new analysis options.
 
-## 0.1.0-nullsafety.2
+## 2.0.2
 
-* Fix outdated links across a number of markdown files ([#3276](https://github.com/flutter/plugins/pull/3276))
+* Replaced reference to `shared_preferences` plugin with the `url_launcher` in the README.
 
-## 0.1.0-nullsafety.1
+## 2.0.1
+
+* Updated installation instructions in README.
+
+## 2.0.0
 
 * Migrate to null safety.
+* Update the example app: remove the deprecated `RaisedButton` and `FlatButton` widgets.
+* Fix outdated links across a number of markdown files ([#3276](https://github.com/flutter/plugins/pull/3276))
+* Set `implementation` in pubspec.yaml
 
 ## 0.0.2+1
 

@@ -1,45 +1,46 @@
-// Copyright 2020 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:file_selector_platform_interface/file_selector_platform_interface.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:test/fake.dart';
 
 void main() {
-  MockFileSelector mock;
-  final initialDirectory = '/home/flutteruser';
-  final confirmButtonText = 'Use this profile picture';
-  final suggestedName = 'suggested_name';
-  final acceptedTypeGroups = [
-    XTypeGroup(label: 'documents', mimeTypes: [
+  late FakeFileSelector fakePlatformImplementation;
+  const String initialDirectory = '/home/flutteruser';
+  const String confirmButtonText = 'Use this profile picture';
+  const String suggestedName = 'suggested_name';
+  final List<XTypeGroup> acceptedTypeGroups = <XTypeGroup>[
+    XTypeGroup(label: 'documents', mimeTypes: <String>[
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessing',
     ]),
-    XTypeGroup(label: 'images', extensions: [
+    XTypeGroup(label: 'images', extensions: <String>[
       'jpg',
       'png',
     ]),
   ];
 
   setUp(() {
-    mock = MockFileSelector();
-    FileSelectorPlatform.instance = mock;
+    fakePlatformImplementation = FakeFileSelector();
+    FileSelectorPlatform.instance = fakePlatformImplementation;
   });
 
   group('openFile', () {
-    final expectedFile = XFile('path');
+    final XFile expectedFile = XFile('path');
 
     test('works', () async {
-      when(mock.openFile(
-        initialDirectory: initialDirectory,
-        confirmButtonText: confirmButtonText,
-        acceptedTypeGroups: acceptedTypeGroups,
-      )).thenAnswer((_) => Future.value(expectedFile));
+      fakePlatformImplementation
+        ..setExpectations(
+            initialDirectory: initialDirectory,
+            confirmButtonText: confirmButtonText,
+            acceptedTypeGroups: acceptedTypeGroups)
+        ..setFileResponse(<XFile>[expectedFile]);
 
-      final file = await openFile(
+      final XFile? file = await openFile(
         initialDirectory: initialDirectory,
         confirmButtonText: confirmButtonText,
         acceptedTypeGroups: acceptedTypeGroups,
@@ -49,102 +50,114 @@ void main() {
     });
 
     test('works with no arguments', () async {
-      when(mock.openFile()).thenAnswer((_) => Future.value(expectedFile));
+      fakePlatformImplementation.setFileResponse(<XFile>[expectedFile]);
 
-      final file = await openFile();
+      final XFile? file = await openFile();
 
       expect(file, expectedFile);
     });
 
     test('sets the initial directory', () async {
-      when(mock.openFile(initialDirectory: initialDirectory))
-          .thenAnswer((_) => Future.value(expectedFile));
+      fakePlatformImplementation
+        ..setExpectations(initialDirectory: initialDirectory)
+        ..setFileResponse(<XFile>[expectedFile]);
 
-      final file = await openFile(initialDirectory: initialDirectory);
+      final XFile? file = await openFile(initialDirectory: initialDirectory);
       expect(file, expectedFile);
     });
 
     test('sets the button confirmation label', () async {
-      when(mock.openFile(confirmButtonText: confirmButtonText))
-          .thenAnswer((_) => Future.value(expectedFile));
+      fakePlatformImplementation
+        ..setExpectations(confirmButtonText: confirmButtonText)
+        ..setFileResponse(<XFile>[expectedFile]);
 
-      final file = await openFile(confirmButtonText: confirmButtonText);
+      final XFile? file = await openFile(confirmButtonText: confirmButtonText);
       expect(file, expectedFile);
     });
 
     test('sets the accepted type groups', () async {
-      when(mock.openFile(acceptedTypeGroups: acceptedTypeGroups))
-          .thenAnswer((_) => Future.value(expectedFile));
+      fakePlatformImplementation
+        ..setExpectations(acceptedTypeGroups: acceptedTypeGroups)
+        ..setFileResponse(<XFile>[expectedFile]);
 
-      final file = await openFile(acceptedTypeGroups: acceptedTypeGroups);
+      final XFile? file =
+          await openFile(acceptedTypeGroups: acceptedTypeGroups);
       expect(file, expectedFile);
     });
   });
 
   group('openFiles', () {
-    final expectedFiles = [XFile('path')];
+    final List<XFile> expectedFiles = <XFile>[XFile('path')];
 
     test('works', () async {
-      when(mock.openFiles(
-        initialDirectory: initialDirectory,
-        confirmButtonText: confirmButtonText,
-        acceptedTypeGroups: acceptedTypeGroups,
-      )).thenAnswer((_) => Future.value(expectedFiles));
+      fakePlatformImplementation
+        ..setExpectations(
+            initialDirectory: initialDirectory,
+            confirmButtonText: confirmButtonText,
+            acceptedTypeGroups: acceptedTypeGroups)
+        ..setFileResponse(expectedFiles);
 
-      final file = await openFiles(
+      final List<XFile> files = await openFiles(
         initialDirectory: initialDirectory,
         confirmButtonText: confirmButtonText,
         acceptedTypeGroups: acceptedTypeGroups,
       );
 
-      expect(file, expectedFiles);
+      expect(files, expectedFiles);
     });
 
     test('works with no arguments', () async {
-      when(mock.openFiles()).thenAnswer((_) => Future.value(expectedFiles));
+      fakePlatformImplementation.setFileResponse(expectedFiles);
 
-      final files = await openFiles();
+      final List<XFile> files = await openFiles();
 
       expect(files, expectedFiles);
     });
 
     test('sets the initial directory', () async {
-      when(mock.openFiles(initialDirectory: initialDirectory))
-          .thenAnswer((_) => Future.value(expectedFiles));
+      fakePlatformImplementation
+        ..setExpectations(initialDirectory: initialDirectory)
+        ..setFileResponse(expectedFiles);
 
-      final files = await openFiles(initialDirectory: initialDirectory);
+      final List<XFile> files =
+          await openFiles(initialDirectory: initialDirectory);
       expect(files, expectedFiles);
     });
 
     test('sets the button confirmation label', () async {
-      when(mock.openFiles(confirmButtonText: confirmButtonText))
-          .thenAnswer((_) => Future.value(expectedFiles));
+      fakePlatformImplementation
+        ..setExpectations(confirmButtonText: confirmButtonText)
+        ..setFileResponse(expectedFiles);
 
-      final files = await openFiles(confirmButtonText: confirmButtonText);
+      final List<XFile> files =
+          await openFiles(confirmButtonText: confirmButtonText);
       expect(files, expectedFiles);
     });
 
     test('sets the accepted type groups', () async {
-      when(mock.openFiles(acceptedTypeGroups: acceptedTypeGroups))
-          .thenAnswer((_) => Future.value(expectedFiles));
+      fakePlatformImplementation
+        ..setExpectations(acceptedTypeGroups: acceptedTypeGroups)
+        ..setFileResponse(expectedFiles);
 
-      final files = await openFiles(acceptedTypeGroups: acceptedTypeGroups);
+      final List<XFile> files =
+          await openFiles(acceptedTypeGroups: acceptedTypeGroups);
       expect(files, expectedFiles);
     });
   });
 
   group('getSavePath', () {
-    final expectedSavePath = '/example/path';
+    const String expectedSavePath = '/example/path';
 
     test('works', () async {
-      when(mock.getSavePath(
-        initialDirectory: initialDirectory,
-        confirmButtonText: confirmButtonText,
-        acceptedTypeGroups: acceptedTypeGroups,
-        suggestedName: suggestedName,
-      )).thenAnswer((_) => Future.value(expectedSavePath));
+      fakePlatformImplementation
+        ..setExpectations(
+            initialDirectory: initialDirectory,
+            confirmButtonText: confirmButtonText,
+            acceptedTypeGroups: acceptedTypeGroups,
+            suggestedName: suggestedName)
+        ..setPathResponse(expectedSavePath);
 
-      final savePath = await getSavePath(
+      final String? savePath = await getSavePath(
         initialDirectory: initialDirectory,
         confirmButtonText: confirmButtonText,
         acceptedTypeGroups: acceptedTypeGroups,
@@ -155,57 +168,63 @@ void main() {
     });
 
     test('works with no arguments', () async {
-      when(mock.getSavePath())
-          .thenAnswer((_) => Future.value(expectedSavePath));
+      fakePlatformImplementation.setPathResponse(expectedSavePath);
 
-      final savePath = await getSavePath();
+      final String? savePath = await getSavePath();
       expect(savePath, expectedSavePath);
     });
 
     test('sets the initial directory', () async {
-      when(mock.getSavePath(initialDirectory: initialDirectory))
-          .thenAnswer((_) => Future.value(expectedSavePath));
+      fakePlatformImplementation
+        ..setExpectations(initialDirectory: initialDirectory)
+        ..setPathResponse(expectedSavePath);
 
-      final savePath = await getSavePath(initialDirectory: initialDirectory);
+      final String? savePath =
+          await getSavePath(initialDirectory: initialDirectory);
       expect(savePath, expectedSavePath);
     });
 
     test('sets the button confirmation label', () async {
-      when(mock.getSavePath(confirmButtonText: confirmButtonText))
-          .thenAnswer((_) => Future.value(expectedSavePath));
+      fakePlatformImplementation
+        ..setExpectations(confirmButtonText: confirmButtonText)
+        ..setPathResponse(expectedSavePath);
 
-      final savePath = await getSavePath(confirmButtonText: confirmButtonText);
+      final String? savePath =
+          await getSavePath(confirmButtonText: confirmButtonText);
       expect(savePath, expectedSavePath);
     });
 
     test('sets the accepted type groups', () async {
-      when(mock.getSavePath(acceptedTypeGroups: acceptedTypeGroups))
-          .thenAnswer((_) => Future.value(expectedSavePath));
+      fakePlatformImplementation
+        ..setExpectations(acceptedTypeGroups: acceptedTypeGroups)
+        ..setPathResponse(expectedSavePath);
 
-      final savePath =
+      final String? savePath =
           await getSavePath(acceptedTypeGroups: acceptedTypeGroups);
       expect(savePath, expectedSavePath);
     });
 
     test('sets the suggested name', () async {
-      when(mock.getSavePath(suggestedName: suggestedName))
-          .thenAnswer((_) => Future.value(expectedSavePath));
+      fakePlatformImplementation
+        ..setExpectations(suggestedName: suggestedName)
+        ..setPathResponse(expectedSavePath);
 
-      final savePath = await getSavePath(suggestedName: suggestedName);
+      final String? savePath = await getSavePath(suggestedName: suggestedName);
       expect(savePath, expectedSavePath);
     });
   });
 
   group('getDirectoryPath', () {
-    final expectedDirectoryPath = '/example/path';
+    const String expectedDirectoryPath = '/example/path';
 
     test('works', () async {
-      when(mock.getDirectoryPath(
-        initialDirectory: initialDirectory,
-        confirmButtonText: confirmButtonText,
-      )).thenAnswer((_) => Future.value(expectedDirectoryPath));
+      fakePlatformImplementation
+        ..setExpectations(
+            initialDirectory: initialDirectory,
+            confirmButtonText: confirmButtonText)
+        ..setPathResponse(expectedDirectoryPath);
 
-      final directoryPath = await getDirectoryPath(
+      final String? directoryPath = await getDirectoryPath(
         initialDirectory: initialDirectory,
         confirmButtonText: confirmButtonText,
       );
@@ -214,33 +233,111 @@ void main() {
     });
 
     test('works with no arguments', () async {
-      when(mock.getDirectoryPath())
-          .thenAnswer((_) => Future.value(expectedDirectoryPath));
+      fakePlatformImplementation.setPathResponse(expectedDirectoryPath);
 
-      final directoryPath = await getDirectoryPath();
+      final String? directoryPath = await getDirectoryPath();
       expect(directoryPath, expectedDirectoryPath);
     });
 
     test('sets the initial directory', () async {
-      when(mock.getDirectoryPath(initialDirectory: initialDirectory))
-          .thenAnswer((_) => Future.value(expectedDirectoryPath));
+      fakePlatformImplementation
+        ..setExpectations(initialDirectory: initialDirectory)
+        ..setPathResponse(expectedDirectoryPath);
 
-      final directoryPath =
+      final String? directoryPath =
           await getDirectoryPath(initialDirectory: initialDirectory);
       expect(directoryPath, expectedDirectoryPath);
     });
 
     test('sets the button confirmation label', () async {
-      when(mock.getDirectoryPath(confirmButtonText: confirmButtonText))
-          .thenAnswer((_) => Future.value(expectedDirectoryPath));
+      fakePlatformImplementation
+        ..setExpectations(confirmButtonText: confirmButtonText)
+        ..setPathResponse(expectedDirectoryPath);
 
-      final directoryPath =
+      final String? directoryPath =
           await getDirectoryPath(confirmButtonText: confirmButtonText);
       expect(directoryPath, expectedDirectoryPath);
     });
   });
 }
 
-class MockFileSelector extends Mock
+class FakeFileSelector extends Fake
     with MockPlatformInterfaceMixin
-    implements FileSelectorPlatform {}
+    implements FileSelectorPlatform {
+  // Expectations.
+  List<XTypeGroup>? acceptedTypeGroups = const <XTypeGroup>[];
+  String? initialDirectory;
+  String? confirmButtonText;
+  String? suggestedName;
+  // Return values.
+  List<XFile>? files;
+  String? path;
+
+  void setExpectations({
+    List<XTypeGroup> acceptedTypeGroups = const <XTypeGroup>[],
+    String? initialDirectory,
+    String? suggestedName,
+    String? confirmButtonText,
+  }) {
+    this.acceptedTypeGroups = acceptedTypeGroups;
+    this.initialDirectory = initialDirectory;
+    this.suggestedName = suggestedName;
+    this.confirmButtonText = confirmButtonText;
+  }
+
+  void setFileResponse(List<XFile> files) {
+    this.files = files;
+  }
+
+  void setPathResponse(String path) {
+    this.path = path;
+  }
+
+  @override
+  Future<XFile?> openFile({
+    List<XTypeGroup>? acceptedTypeGroups,
+    String? initialDirectory,
+    String? confirmButtonText,
+  }) async {
+    expect(acceptedTypeGroups, this.acceptedTypeGroups);
+    expect(initialDirectory, this.initialDirectory);
+    expect(suggestedName, suggestedName);
+    return files?[0];
+  }
+
+  @override
+  Future<List<XFile>> openFiles({
+    List<XTypeGroup>? acceptedTypeGroups,
+    String? initialDirectory,
+    String? confirmButtonText,
+  }) async {
+    expect(acceptedTypeGroups, this.acceptedTypeGroups);
+    expect(initialDirectory, this.initialDirectory);
+    expect(suggestedName, suggestedName);
+    return files!;
+  }
+
+  @override
+  Future<String?> getSavePath({
+    List<XTypeGroup>? acceptedTypeGroups,
+    String? initialDirectory,
+    String? suggestedName,
+    String? confirmButtonText,
+  }) async {
+    expect(acceptedTypeGroups, this.acceptedTypeGroups);
+    expect(initialDirectory, this.initialDirectory);
+    expect(suggestedName, this.suggestedName);
+    expect(confirmButtonText, this.confirmButtonText);
+    return path;
+  }
+
+  @override
+  Future<String?> getDirectoryPath({
+    String? initialDirectory,
+    String? confirmButtonText,
+  }) async {
+    expect(initialDirectory, this.initialDirectory);
+    expect(confirmButtonText, this.confirmButtonText);
+    return path;
+  }
+}

@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -30,7 +30,7 @@ void main() {
       log.clear();
     });
 
-    group("With device auth fail over", () {
+    group('With device auth fail over', () {
       test('authenticate with no args on Android.', () async {
         setMockPathProviderPlatform(FakePlatform(operatingSystem: 'android'));
         await localAuthentication.authenticate(
@@ -73,6 +73,17 @@ void main() {
         );
       });
 
+      test('authenticate with no localizedReason on iOS.', () async {
+        setMockPathProviderPlatform(FakePlatform(operatingSystem: 'ios'));
+        await expectLater(
+          localAuthentication.authenticate(
+            localizedReason: '',
+            biometricOnly: true,
+          ),
+          throwsAssertionError,
+        );
+      });
+
       test('authenticate with no sensitive transaction.', () async {
         setMockPathProviderPlatform(FakePlatform(operatingSystem: 'android'));
         await localAuthentication.authenticate(
@@ -97,7 +108,7 @@ void main() {
       });
     });
 
-    group("With biometrics only", () {
+    group('With biometrics only', () {
       test('authenticate with no args on Android.', () async {
         setMockPathProviderPlatform(FakePlatform(operatingSystem: 'android'));
         await localAuthentication.authenticate(

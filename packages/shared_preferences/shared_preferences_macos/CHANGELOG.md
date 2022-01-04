@@ -1,6 +1,19 @@
-## 0.0.2-nullsafety
+## NEXT
 
-* Update Dart SDK constraint for null safety.
+* Fixes newly enabled analyzer options.
+
+## 2.0.2
+
+* Add native unit tests.
+* Updated installation instructions in README.
+
+## 2.0.1
+
+* Add `implements` to the pubspec.
+
+## 2.0.0
+
+* Migrate to null safety.
 
 ## 0.0.1+12
 

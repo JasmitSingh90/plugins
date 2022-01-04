@@ -1,31 +1,91 @@
-## 6.0.0-nullsafety.6
+## 6.0.17
 
-* Correct statement in description about which platforms url_launcher supports.
+* Updates code for new analysis options.
 
-## 6.0.0-nullsafety.5
+## 6.0.16
 
-* Document that the web plugin is not endorsed in the `nullsafety` prerelease for now.
+* Moves Android and iOS implementations to federated packages.
 
-## 6.0.0-nullsafety.4
+## 6.0.15
 
-* Update the example app: remove the deprecated `RaisedButton` and `FlatButton` widgets.
+* Updates README:
+  * Improves organization.
+  * Clarifies how `canLaunch` should be used.
+* Updates example application to demonstrate intended use of `canLaunch`.
 
-## 6.0.0-nullsafety.3
+## 6.0.14
 
-* forceSafariVC should be nullable.
+* Updates readme to indicate that sending SMS messages on Android 11 requires to add a query to AndroidManifest.xml.
+* Fixes integration tests.
+* Updates example app Android compileSdkVersion to 31.
 
-## 6.0.0-nullsafety.2
+## 6.0.13
 
-* Fix outdated links across a number of markdown files ([#3276](https://github.com/flutter/plugins/pull/3276))
+* Fixed extracting browser headers when they are null error.
 
-## 6.0.0-nullsafety.1
+## 6.0.12
 
-* Bump Dart SDK to support null safety.
+* Fixed an error where 'launch' method of url_launcher would cause an error if the provided URL was not valid by RFC 3986.
 
-## 6.0.0-nullsafety
+## 6.0.11
+
+* Update minimum Flutter SDK to 2.5 and iOS deployment target to 9.0.
+* Updated Android lint settings.
+
+## 6.0.10
+
+* Remove references to the Android v1 embedding.
+
+## 6.0.9
+
+* Silenced warnings that may occur during build when using a very
+  recent version of Flutter relating to null safety.
+
+## 6.0.8
+
+* Adding API level 30 required package visibility configuration to the example's AndroidManifest.xml and README
+* Fix test button check for iOS 15.
+
+## 6.0.7
+
+* Update the README to describe a workaround to the `Uri` query
+  encoding bug.
+
+## 6.0.6
+
+* Require `url_launcher_platform_interface` 2.0.3. This fixes an issue
+  where 6.0.5 could fail to compile in some projects due to internal
+  changes in that version that were not compatible with earlier versions
+  of `url_launcher_platform_interface`.
+
+## 6.0.5
+
+* Add iOS unit and UI integration test targets.
+* Add a `Link` widget to the example app.
+
+## 6.0.4
+
+* Migrate maven repository from jcenter to mavenCentral.
+
+## 6.0.3
+
+* Update README notes about URL schemes on iOS
+
+## 6.0.2
+
+* Update platform_plugin_interface version requirement.
+
+## 6.0.1
+
+* Update result to `True` on iOS when the url was loaded successfully.
+* Added a README note about required applications.
+
+## 6.0.0
 
 * Migrate to null safety.
-* **Breaking change**: web plugins aren't endorsed in null-safe plugins yet.
+* Fix outdated links across a number of markdown files ([#3276](https://github.com/flutter/plugins/pull/3276))
+* Update the example app: remove the deprecated `RaisedButton` and `FlatButton` widgets.
+* Correct statement in description about which platforms url_launcher supports.
 
 ## 5.7.13
 

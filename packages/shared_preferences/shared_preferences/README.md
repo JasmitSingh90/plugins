@@ -7,14 +7,6 @@ Wraps platform-specific persistent storage for simple data
 and there is no guarantee that writes will be persisted to disk after
 returning, so this plugin must not be used for storing critical data.
 
-
-**Please set your constraint to `shared_preferences: '>=0.5.y+x <2.0.0'`**
-
-## Backward compatible 1.0.0 version is coming
-The plugin has reached a stable API, we guarantee that version `1.0.0` will be backward compatible with `0.5.y+z`.
-Please use `shared_preferences: '>=0.5.y+x <2.0.0'` as your dependency constraint to allow a smoother ecosystem migration.
-For more details see: https://github.com/flutter/flutter/wiki/Package-migration-to-1.0.0
-
 ## Usage
 To use this plugin, add `shared_preferences` as a [dependency in your pubspec.yaml file](https://flutter.dev/docs/development/platform-integration/platform-channels).
 
@@ -50,5 +42,6 @@ _incrementCounter() async {
 You can populate `SharedPreferences` with initial values in your tests by running this code:
 
 ```dart
-SharedPreferences.setMockInitialValues (Map<String, dynamic> values);
+Map<String, Object> values = <String, Object>{'counter': 1};
+SharedPreferences.setMockInitialValues(values);
 ```

@@ -1,15 +1,11 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:io' show Directory, Platform;
+import 'dart:io' show Directory;
 
-import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
-import 'package:path_provider_linux/path_provider_linux.dart';
-import 'package:path_provider_windows/path_provider_windows.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
-import 'package:path_provider_platform_interface/src/method_channel_path_provider.dart';
 
 export 'package:path_provider_platform_interface/path_provider_platform_interface.dart'
     show StorageDirectory;
@@ -18,27 +14,28 @@ export 'package:path_provider_platform_interface/path_provider_platform_interfac
 @Deprecated('This is no longer necessary, and is now a no-op')
 set disablePathProviderPlatformOverride(bool override) {}
 
-bool _manualDartRegistrationNeeded = true;
+/// An exception thrown when a directory that should always be available on
+/// the current platform cannot be obtained.
+class MissingPlatformDirectoryException implements Exception {
+  /// Creates a new exception
+  MissingPlatformDirectoryException(this.message, {this.details});
 
-PathProviderPlatform get _platform {
-  // This is to manually endorse Dart implementations until automatic
-  // registration of Dart plugins is implemented. For details see
-  // https://github.com/flutter/flutter/issues/52267.
-  if (_manualDartRegistrationNeeded) {
-    // Only do the initial registration if it hasn't already been overridden
-    // with a non-default instance.
-    if (!kIsWeb && PathProviderPlatform.instance is MethodChannelPathProvider) {
-      if (Platform.isLinux) {
-        PathProviderPlatform.instance = PathProviderLinux();
-      } else if (Platform.isWindows) {
-        PathProviderPlatform.instance = PathProviderWindows();
-      }
-    }
-    _manualDartRegistrationNeeded = false;
+  /// The explanation of the exception.
+  final String message;
+
+  /// Added details, if any.
+  ///
+  /// E.g., an error object from the platform implementation.
+  final Object? details;
+
+  @override
+  String toString() {
+    final String detailsAddition = details == null ? '' : ': $details';
+    return 'MissingPlatformDirectoryException($message)$detailsAddition';
   }
-
-  return PathProviderPlatform.instance;
 }
+
+PathProviderPlatform get _platform => PathProviderPlatform.instance;
 
 /// Path to the temporary directory on the device that is not backed up and is
 /// suitable for storing caches of downloaded files.
@@ -51,10 +48,14 @@ PathProviderPlatform get _platform {
 /// On iOS, this uses the `NSCachesDirectory` API.
 ///
 /// On Android, this uses the `getCacheDir` API on the context.
-Future<Directory?> getTemporaryDirectory() async {
+///
+/// Throws a `MissingPlatformDirectoryException` if the system is unable to
+/// provide the directory.
+Future<Directory> getTemporaryDirectory() async {
   final String? path = await _platform.getTemporaryPath();
   if (path == null) {
-    return null;
+    throw MissingPlatformDirectoryException(
+        'Unable to get temporary directory');
   }
   return Directory(path);
 }
@@ -69,10 +70,14 @@ Future<Directory?> getTemporaryDirectory() async {
 /// If this directory does not exist, it is created automatically.
 ///
 /// On Android, this function uses the `getFilesDir` API on the context.
-Future<Directory?> getApplicationSupportDirectory() async {
+///
+/// Throws a `MissingPlatformDirectoryException` if the system is unable to
+/// provide the directory.
+Future<Directory> getApplicationSupportDirectory() async {
   final String? path = await _platform.getApplicationSupportPath();
   if (path == null) {
-    return null;
+    throw MissingPlatformDirectoryException(
+        'Unable to get application support directory');
   }
 
   return Directory(path);
@@ -83,10 +88,13 @@ Future<Directory?> getApplicationSupportDirectory() async {
 ///
 /// On Android, this function throws an [UnsupportedError] as no equivalent
 /// path exists.
-Future<Directory?> getLibraryDirectory() async {
+///
+/// Throws a `MissingPlatformDirectoryException` if the system is unable to
+/// provide the directory on a supported platform.
+Future<Directory> getLibraryDirectory() async {
   final String? path = await _platform.getLibraryPath();
   if (path == null) {
-    return null;
+    throw MissingPlatformDirectoryException('Unable to get library directory');
   }
   return Directory(path);
 }
@@ -100,10 +108,14 @@ Future<Directory?> getLibraryDirectory() async {
 /// On Android, this uses the `getDataDirectory` API on the context. Consider
 /// using [getExternalStorageDirectory] instead if data is intended to be visible
 /// to the user.
-Future<Directory?> getApplicationDocumentsDirectory() async {
+///
+/// Throws a `MissingPlatformDirectoryException` if the system is unable to
+/// provide the directory.
+Future<Directory> getApplicationDocumentsDirectory() async {
   final String? path = await _platform.getApplicationDocumentsPath();
   if (path == null) {
-    return null;
+    throw MissingPlatformDirectoryException(
+        'Unable to get application documents directory');
   }
   return Directory(path);
 }

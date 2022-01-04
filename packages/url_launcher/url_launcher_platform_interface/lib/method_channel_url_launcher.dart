@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -21,7 +21,7 @@ class MethodChannelUrlLauncher extends UrlLauncherPlatform {
     return _channel.invokeMethod<bool>(
       'canLaunch',
       <String, Object>{'url': url},
-    ).then((value) => value ?? false);
+    ).then((bool? value) => value ?? false);
   }
 
   @override
@@ -51,6 +51,6 @@ class MethodChannelUrlLauncher extends UrlLauncherPlatform {
         'universalLinksOnly': universalLinksOnly,
         'headers': headers,
       },
-    ).then((value) => value ?? false);
+    ).then((bool? value) => value ?? false);
   }
 }

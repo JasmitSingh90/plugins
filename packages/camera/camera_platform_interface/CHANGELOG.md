@@ -1,10 +1,22 @@
-## 2.0.0-nullsafety
+## 2.1.1
 
-- Migrate to null safety.
+* Add web-relevant docs to platform interface code.
+
+## 2.1.0
+
+* Introduces interface methods for pausing and resuming the camera preview.
+
+## 2.0.1
+
+* Update platform_plugin_interface version requirement.
+
+## 2.0.0
+
+- Stable null safety release.
 
 ## 1.6.0
 
-- Added VideoRecordedEvent to support ending a video recording in the native implementation. 
+- Added VideoRecordedEvent to support ending a video recording in the native implementation.
 
 ## 1.5.0
 
