@@ -1,3 +1,34 @@
+## NEXT
+
+* Ignores unnecessary import warnings in preparation for [upcoming Flutter changes](https://github.com/flutter/flutter/pull/106316).
+
+## 5.1.3
+
+* Updates references to the obsolete master branch.
+* Removes unnecessary imports.
+
+## 5.1.2
+
+* Adopts `Object.hash`.
+* Removes obsolete dependency on `pedantic`.
+
+## 5.1.1
+
+* Adds `rotationCorrection` (for Android playing videos recorded in landscapeRight [#60327](https://github.com/flutter/flutter/issues/60327)).
+
+## 5.1.0
+
+* Adds `allowBackgroundPlayback` to `VideoPlayerOptions`.
+
+## 5.0.2
+
+* Adds the Pigeon definitions used to create the method channel implementation.
+* Internal code cleanup for stricter analysis options.
+
+## 5.0.1
+
+* Update to use the `verify` method introduced in platform_plugin_interface 2.1.0.
+
 ## 5.0.0
 
 * **BREAKING CHANGES**:

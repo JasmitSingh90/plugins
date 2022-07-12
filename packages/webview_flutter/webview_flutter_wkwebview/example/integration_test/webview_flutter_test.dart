@@ -2,31 +2,51 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This test is run using `flutter drive` by the CI (see /script/tool/README.md
+// in this repository for details on driving that tooling manually), but can
+// also be run using `flutter test` directly during development.
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+// TODO(a14n): remove this import once Flutter 3.1 or later reaches stable (including flutter/flutter#104231)
+// ignore: unnecessary_import
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:webview_flutter_platform_interface/webview_flutter_platform_interface.dart';
+import 'package:webview_flutter_wkwebview/src/common/instance_manager.dart';
+import 'package:webview_flutter_wkwebview/src/common/weak_reference_utils.dart';
 import 'package:webview_flutter_wkwebview_example/navigation_decision.dart';
 import 'package:webview_flutter_wkwebview_example/navigation_request.dart';
 import 'package:webview_flutter_wkwebview_example/web_view.dart';
 
-void main() {
+Future<void> main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  // URLs to navigate to in tests. These need to be URLs that we are confident will
-  // always be accessible, and won't do redirection. (E.g., just
-  // 'https://www.google.com/' will sometimes redirect traffic that looks
-  // like it's coming from a bot, which is true of these tests).
-  const String primaryUrl = 'https://flutter.dev/';
-  const String secondaryUrl = 'https://www.google.com/robots.txt';
+  final HttpServer server = await HttpServer.bind(InternetAddress.anyIPv4, 0);
+  server.forEach((HttpRequest request) {
+    if (request.uri.path == '/hello.txt') {
+      request.response.writeln('Hello, world.');
+    } else if (request.uri.path == '/secondary.txt') {
+      request.response.writeln('How are you today?');
+    } else if (request.uri.path == '/headers') {
+      request.response.writeln('${request.headers}');
+    } else if (request.uri.path == '/favicon.ico') {
+      request.response.statusCode = HttpStatus.notFound;
+    } else {
+      fail('unexpected request: ${request.method} ${request.uri}');
+    }
+    request.response.close();
+  });
+  final String prefixUrl = 'http://${server.address.address}:${server.port}';
+  final String primaryUrl = '$prefixUrl/hello.txt';
+  final String secondaryUrl = '$prefixUrl/secondary.txt';
+  final String headersUrl = '$prefixUrl/headers';
 
   testWidgets('initialUrl', (WidgetTester tester) async {
     final Completer<WebViewController> controllerCompleter =
@@ -47,6 +67,27 @@ void main() {
     final String? currentUrl = await controller.currentUrl();
     expect(currentUrl, primaryUrl);
   });
+
+  testWidgets(
+      'withWeakRefenceTo allows encapsulating class to be garbage collected',
+      (WidgetTester tester) async {
+    final Completer<int> gcCompleter = Completer<int>();
+    final InstanceManager instanceManager = InstanceManager(
+      onWeakReferenceRemoved: gcCompleter.complete,
+    );
+
+    ClassWithCallbackClass? instance = ClassWithCallbackClass();
+    instanceManager.addHostCreatedInstance(instance.callbackClass, 0);
+    instance = null;
+
+    // Force garbage collection.
+    await IntegrationTestWidgetsFlutterBinding.instance
+        .watchPerformance(() async {
+      await tester.pumpAndSettle();
+    });
+
+    expect(gcCompleter.future, completion(0));
+  }, timeout: const Timeout(Duration(seconds: 10)));
 
   testWidgets('loadUrl', (WidgetTester tester) async {
     final Completer<WebViewController> controllerCompleter =
@@ -118,10 +159,9 @@ void main() {
     final Map<String, String> headers = <String, String>{
       'test_header': 'flutter_test_header'
     };
-    await controller.loadUrl('https://flutter-header-echo.herokuapp.com/',
-        headers: headers);
+    await controller.loadUrl(headersUrl, headers: headers);
     final String? currentUrl = await controller.currentUrl();
-    expect(currentUrl, 'https://flutter-header-echo.herokuapp.com/');
+    expect(currentUrl, headersUrl);
 
     await pageStarts.stream.firstWhere((String url) => url == currentUrl);
     await pageLoads.stream.firstWhere((String url) => url == currentUrl);
@@ -466,7 +506,7 @@ void main() {
                 onMessageReceived: (JavascriptMessage message) {
                   final double currentTime = double.parse(message.message);
                   // Let it play for at least 1 second to make sure the related video's properties are set.
-                  if (currentTime > 1) {
+                  if (currentTime > 1 && !videoPlaying.isCompleted) {
                     videoPlaying.complete(null);
                   }
                 },
@@ -517,7 +557,7 @@ void main() {
                 onMessageReceived: (JavascriptMessage message) {
                   final double currentTime = double.parse(message.message);
                   // Let it play for at least 1 second to make sure the related video's properties are set.
-                  if (currentTime > 1) {
+                  if (currentTime > 1 && !videoPlaying.isCompleted) {
                     videoPlaying.complete(null);
                   }
                 },
@@ -846,8 +886,8 @@ void main() {
 
   group('NavigationDelegate', () {
     const String blankPage = '<!DOCTYPE html><head></head><body></body></html>';
-    final String blankPageEncoded = 'data:text/html;charset=utf-8;base64,' +
-        base64Encode(const Utf8Encoder().convert(blankPage));
+    final String blankPageEncoded = 'data:text/html;charset=utf-8;base64,'
+        '${base64Encode(const Utf8Encoder().convert(blankPage))}';
 
     testWidgets('can allow requests', (WidgetTester tester) async {
       final Completer<WebViewController> controllerCompleter =
@@ -1166,7 +1206,8 @@ Future<String> _getUserAgent(WebViewController controller) async {
 
 class ResizableWebView extends StatefulWidget {
   const ResizableWebView(
-      {required this.onResize, required this.onPageFinished});
+      {Key? key, required this.onResize, required this.onPageFinished})
+      : super(key: key);
 
   final JavascriptMessageHandler onResize;
   final VoidCallback onPageFinished;
@@ -1234,4 +1275,34 @@ class ResizableWebViewState extends State<ResizableWebView> {
       ),
     );
   }
+}
+
+class CopyableObjectWithCallback with Copyable {
+  CopyableObjectWithCallback(this.callback);
+
+  final VoidCallback callback;
+
+  @override
+  CopyableObjectWithCallback copy() {
+    return CopyableObjectWithCallback(callback);
+  }
+}
+
+class ClassWithCallbackClass {
+  ClassWithCallbackClass() {
+    callbackClass = CopyableObjectWithCallback(
+      withWeakRefenceTo(
+        this,
+        (WeakReference<ClassWithCallbackClass> weakReference) {
+          return () {
+            // Weak reference to `this` in callback.
+            // ignore: unnecessary_statements
+            weakReference;
+          };
+        },
+      ),
+    );
+  }
+
+  late final CopyableObjectWithCallback callbackClass;
 }
