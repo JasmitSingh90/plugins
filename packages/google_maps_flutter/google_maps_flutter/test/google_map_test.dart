@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -35,7 +35,7 @@ void main() {
     );
 
     final FakePlatformGoogleMap platformGoogleMap =
-        fakePlatformViewsController.lastCreatedView;
+        fakePlatformViewsController.lastCreatedView!;
 
     expect(platformGoogleMap.cameraPosition,
         const CameraPosition(target: LatLng(10.0, 15.0)));
@@ -62,7 +62,7 @@ void main() {
     );
 
     final FakePlatformGoogleMap platformGoogleMap =
-        fakePlatformViewsController.lastCreatedView;
+        fakePlatformViewsController.lastCreatedView!;
 
     expect(platformGoogleMap.cameraPosition,
         const CameraPosition(target: LatLng(10.0, 15.0)));
@@ -80,7 +80,7 @@ void main() {
     );
 
     final FakePlatformGoogleMap platformGoogleMap =
-        fakePlatformViewsController.lastCreatedView;
+        fakePlatformViewsController.lastCreatedView!;
 
     expect(platformGoogleMap.compassEnabled, false);
 
@@ -89,7 +89,6 @@ void main() {
         textDirection: TextDirection.ltr,
         child: GoogleMap(
           initialCameraPosition: CameraPosition(target: LatLng(10.0, 15.0)),
-          compassEnabled: true,
         ),
       ),
     );
@@ -109,7 +108,7 @@ void main() {
     );
 
     final FakePlatformGoogleMap platformGoogleMap =
-        fakePlatformViewsController.lastCreatedView;
+        fakePlatformViewsController.lastCreatedView!;
 
     expect(platformGoogleMap.mapToolbarEnabled, false);
 
@@ -118,7 +117,6 @@ void main() {
         textDirection: TextDirection.ltr,
         child: GoogleMap(
           initialCameraPosition: CameraPosition(target: LatLng(10.0, 15.0)),
-          mapToolbarEnabled: true,
         ),
       ),
     );
@@ -144,7 +142,7 @@ void main() {
     );
 
     final FakePlatformGoogleMap platformGoogleMap =
-        fakePlatformViewsController.lastCreatedView;
+        fakePlatformViewsController.lastCreatedView!;
 
     expect(
         platformGoogleMap.cameraTargetBounds,
@@ -193,7 +191,7 @@ void main() {
     );
 
     final FakePlatformGoogleMap platformGoogleMap =
-        fakePlatformViewsController.lastCreatedView;
+        fakePlatformViewsController.lastCreatedView!;
 
     expect(platformGoogleMap.mapType, MapType.hybrid);
 
@@ -222,7 +220,7 @@ void main() {
     );
 
     final FakePlatformGoogleMap platformGoogleMap =
-        fakePlatformViewsController.lastCreatedView;
+        fakePlatformViewsController.lastCreatedView!;
 
     expect(platformGoogleMap.minMaxZoomPreference,
         const MinMaxZoomPreference(1.0, 3.0));
@@ -232,7 +230,6 @@ void main() {
         textDirection: TextDirection.ltr,
         child: GoogleMap(
           initialCameraPosition: CameraPosition(target: LatLng(10.0, 15.0)),
-          minMaxZoomPreference: MinMaxZoomPreference.unbounded,
         ),
       ),
     );
@@ -253,7 +250,7 @@ void main() {
     );
 
     final FakePlatformGoogleMap platformGoogleMap =
-        fakePlatformViewsController.lastCreatedView;
+        fakePlatformViewsController.lastCreatedView!;
 
     expect(platformGoogleMap.rotateGesturesEnabled, false);
 
@@ -262,7 +259,6 @@ void main() {
         textDirection: TextDirection.ltr,
         child: GoogleMap(
           initialCameraPosition: CameraPosition(target: LatLng(10.0, 15.0)),
-          rotateGesturesEnabled: true,
         ),
       ),
     );
@@ -282,7 +278,7 @@ void main() {
     );
 
     final FakePlatformGoogleMap platformGoogleMap =
-        fakePlatformViewsController.lastCreatedView;
+        fakePlatformViewsController.lastCreatedView!;
 
     expect(platformGoogleMap.scrollGesturesEnabled, false);
 
@@ -291,7 +287,6 @@ void main() {
         textDirection: TextDirection.ltr,
         child: GoogleMap(
           initialCameraPosition: CameraPosition(target: LatLng(10.0, 15.0)),
-          scrollGesturesEnabled: true,
         ),
       ),
     );
@@ -311,7 +306,7 @@ void main() {
     );
 
     final FakePlatformGoogleMap platformGoogleMap =
-        fakePlatformViewsController.lastCreatedView;
+        fakePlatformViewsController.lastCreatedView!;
 
     expect(platformGoogleMap.tiltGesturesEnabled, false);
 
@@ -320,7 +315,6 @@ void main() {
         textDirection: TextDirection.ltr,
         child: GoogleMap(
           initialCameraPosition: CameraPosition(target: LatLng(10.0, 15.0)),
-          tiltGesturesEnabled: true,
         ),
       ),
     );
@@ -339,7 +333,7 @@ void main() {
     );
 
     final FakePlatformGoogleMap platformGoogleMap =
-        fakePlatformViewsController.lastCreatedView;
+        fakePlatformViewsController.lastCreatedView!;
 
     expect(platformGoogleMap.trackCameraPosition, false);
 
@@ -369,7 +363,7 @@ void main() {
     );
 
     final FakePlatformGoogleMap platformGoogleMap =
-        fakePlatformViewsController.lastCreatedView;
+        fakePlatformViewsController.lastCreatedView!;
 
     expect(platformGoogleMap.zoomGesturesEnabled, false);
 
@@ -378,7 +372,6 @@ void main() {
         textDirection: TextDirection.ltr,
         child: GoogleMap(
           initialCameraPosition: CameraPosition(target: LatLng(10.0, 15.0)),
-          zoomGesturesEnabled: true,
         ),
       ),
     );
@@ -398,7 +391,7 @@ void main() {
     );
 
     final FakePlatformGoogleMap platformGoogleMap =
-        fakePlatformViewsController.lastCreatedView;
+        fakePlatformViewsController.lastCreatedView!;
 
     expect(platformGoogleMap.zoomControlsEnabled, false);
 
@@ -407,7 +400,6 @@ void main() {
         textDirection: TextDirection.ltr,
         child: GoogleMap(
           initialCameraPosition: CameraPosition(target: LatLng(10.0, 15.0)),
-          zoomControlsEnabled: true,
         ),
       ),
     );
@@ -421,13 +413,12 @@ void main() {
         textDirection: TextDirection.ltr,
         child: GoogleMap(
           initialCameraPosition: CameraPosition(target: LatLng(10.0, 15.0)),
-          myLocationEnabled: false,
         ),
       ),
     );
 
     final FakePlatformGoogleMap platformGoogleMap =
-        fakePlatformViewsController.lastCreatedView;
+        fakePlatformViewsController.lastCreatedView!;
 
     expect(platformGoogleMap.myLocationEnabled, false);
 
@@ -451,13 +442,12 @@ void main() {
         textDirection: TextDirection.ltr,
         child: GoogleMap(
           initialCameraPosition: CameraPosition(target: LatLng(10.0, 15.0)),
-          myLocationEnabled: false,
         ),
       ),
     );
 
     final FakePlatformGoogleMap platformGoogleMap =
-        fakePlatformViewsController.lastCreatedView;
+        fakePlatformViewsController.lastCreatedView!;
 
     expect(platformGoogleMap.myLocationButtonEnabled, true);
 
@@ -485,7 +475,7 @@ void main() {
     );
 
     final FakePlatformGoogleMap platformGoogleMap =
-        fakePlatformViewsController.lastCreatedView;
+        fakePlatformViewsController.lastCreatedView!;
 
     expect(platformGoogleMap.padding, <double>[0, 0, 0, 0]);
   });
@@ -501,7 +491,7 @@ void main() {
     );
 
     final FakePlatformGoogleMap platformGoogleMap =
-        fakePlatformViewsController.lastCreatedView;
+        fakePlatformViewsController.lastCreatedView!;
 
     expect(platformGoogleMap.padding, <double>[0, 0, 0, 0]);
 
@@ -536,13 +526,12 @@ void main() {
         textDirection: TextDirection.ltr,
         child: GoogleMap(
           initialCameraPosition: CameraPosition(target: LatLng(10.0, 15.0)),
-          trafficEnabled: false,
         ),
       ),
     );
 
     final FakePlatformGoogleMap platformGoogleMap =
-        fakePlatformViewsController.lastCreatedView;
+        fakePlatformViewsController.lastCreatedView!;
 
     expect(platformGoogleMap.trafficEnabled, false);
 
@@ -571,7 +560,7 @@ void main() {
     );
 
     final FakePlatformGoogleMap platformGoogleMap =
-        fakePlatformViewsController.lastCreatedView;
+        fakePlatformViewsController.lastCreatedView!;
 
     expect(platformGoogleMap.buildingsEnabled, false);
 
@@ -580,7 +569,6 @@ void main() {
         textDirection: TextDirection.ltr,
         child: GoogleMap(
           initialCameraPosition: CameraPosition(target: LatLng(10.0, 15.0)),
-          buildingsEnabled: true,
         ),
       ),
     );

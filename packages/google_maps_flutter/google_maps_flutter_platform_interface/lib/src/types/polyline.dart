@@ -1,10 +1,10 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show listEquals, VoidCallback;
+import 'package:flutter/foundation.dart'
+    show immutable, listEquals, VoidCallback;
 import 'package:flutter/material.dart' show Color, Colors;
-import 'package:meta/meta.dart' show immutable, required;
 
 import 'types.dart';
 
@@ -12,38 +12,19 @@ import 'types.dart';
 ///
 /// This does not have to be globally unique, only unique among the list.
 @immutable
-class PolylineId {
+class PolylineId extends MapsObjectId<Polyline> {
   /// Creates an immutable object representing a [PolylineId] among [GoogleMap] polylines.
   ///
   /// An [AssertionError] will be thrown if [value] is null.
-  PolylineId(this.value) : assert(value != null);
-
-  /// value of the [PolylineId].
-  final String value;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    final PolylineId typedOther = other;
-    return value == typedOther.value;
-  }
-
-  @override
-  int get hashCode => value.hashCode;
-
-  @override
-  String toString() {
-    return 'PolylineId{value: $value}';
-  }
+  const PolylineId(String value) : super(value);
 }
 
 /// Draws a line through geographical locations on the map.
 @immutable
-class Polyline {
+class Polyline implements MapsObject<Polyline> {
   /// Creates an immutable object representing a line drawn through geographical locations on the map.
   const Polyline({
-    @required this.polylineId,
+    required this.polylineId,
     this.consumeTapEvents = false,
     this.color = Colors.black,
     this.endCap = Cap.buttCap,
@@ -60,6 +41,9 @@ class Polyline {
 
   /// Uniquely identifies a [Polyline].
   final PolylineId polylineId;
+
+  @override
+  PolylineId get mapsId => polylineId;
 
   /// True if the [Polyline] consumes tap events.
   ///
@@ -129,23 +113,23 @@ class Polyline {
   final int zIndex;
 
   /// Callbacks to receive tap events for polyline placed on this map.
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   /// Creates a new [Polyline] object whose values are the same as this instance,
   /// unless overwritten by the specified parameters.
   Polyline copyWith({
-    Color colorParam,
-    bool consumeTapEventsParam,
-    Cap endCapParam,
-    bool geodesicParam,
-    JointType jointTypeParam,
-    List<PatternItem> patternsParam,
-    List<LatLng> pointsParam,
-    Cap startCapParam,
-    bool visibleParam,
-    int widthParam,
-    int zIndexParam,
-    VoidCallback onTapParam,
+    Color? colorParam,
+    bool? consumeTapEventsParam,
+    Cap? endCapParam,
+    bool? geodesicParam,
+    JointType? jointTypeParam,
+    List<PatternItem>? patternsParam,
+    List<LatLng>? pointsParam,
+    Cap? startCapParam,
+    bool? visibleParam,
+    int? widthParam,
+    int? zIndexParam,
+    VoidCallback? onTapParam,
   }) {
     return Polyline(
       polylineId: polylineId,
@@ -166,6 +150,7 @@ class Polyline {
 
   /// Creates a new [Polyline] object whose values are the same as this
   /// instance.
+  @override
   Polyline clone() {
     return copyWith(
       patternsParam: List<PatternItem>.of(patterns),
@@ -174,10 +159,11 @@ class Polyline {
   }
 
   /// Converts this object to something serializable in JSON.
-  dynamic toJson() {
-    final Map<String, dynamic> json = <String, dynamic>{};
+  @override
+  Object toJson() {
+    final Map<String, Object> json = <String, Object>{};
 
-    void addIfPresent(String fieldName, dynamic value) {
+    void addIfPresent(String fieldName, Object? value) {
       if (value != null) {
         json[fieldName] = value;
       }
@@ -186,10 +172,10 @@ class Polyline {
     addIfPresent('polylineId', polylineId.value);
     addIfPresent('consumeTapEvents', consumeTapEvents);
     addIfPresent('color', color.value);
-    addIfPresent('endCap', endCap?.toJson());
+    addIfPresent('endCap', endCap.toJson());
     addIfPresent('geodesic', geodesic);
-    addIfPresent('jointType', jointType?.value);
-    addIfPresent('startCap', startCap?.toJson());
+    addIfPresent('jointType', jointType.value);
+    addIfPresent('startCap', startCap.toJson());
     addIfPresent('visible', visible);
     addIfPresent('width', width);
     addIfPresent('zIndex', zIndex);
@@ -207,36 +193,40 @@ class Polyline {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    final Polyline typedOther = other;
-    return polylineId == typedOther.polylineId &&
-        consumeTapEvents == typedOther.consumeTapEvents &&
-        color == typedOther.color &&
-        geodesic == typedOther.geodesic &&
-        jointType == typedOther.jointType &&
-        listEquals(patterns, typedOther.patterns) &&
-        listEquals(points, typedOther.points) &&
-        startCap == typedOther.startCap &&
-        endCap == typedOther.endCap &&
-        visible == typedOther.visible &&
-        width == typedOther.width &&
-        zIndex == typedOther.zIndex;
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is Polyline &&
+        polylineId == other.polylineId &&
+        consumeTapEvents == other.consumeTapEvents &&
+        color == other.color &&
+        geodesic == other.geodesic &&
+        jointType == other.jointType &&
+        listEquals(patterns, other.patterns) &&
+        listEquals(points, other.points) &&
+        startCap == other.startCap &&
+        endCap == other.endCap &&
+        visible == other.visible &&
+        width == other.width &&
+        zIndex == other.zIndex;
   }
 
   @override
   int get hashCode => polylineId.hashCode;
 
-  dynamic _pointsToJson() {
-    final List<dynamic> result = <dynamic>[];
+  Object _pointsToJson() {
+    final List<Object> result = <Object>[];
     for (final LatLng point in points) {
       result.add(point.toJson());
     }
     return result;
   }
 
-  dynamic _patternToJson() {
-    final List<dynamic> result = <dynamic>[];
+  Object _patternToJson() {
+    final List<Object> result = <Object>[];
     for (final PatternItem patternItem in patterns) {
       if (patternItem != null) {
         result.add(patternItem.toJson());

@@ -1,3 +1,42 @@
+## 2.1.1
+
+* Updates imports for `prefer_relative_imports`.
+* Updates minimum Flutter version to 2.10.
+
+## 2.1.0
+
+* Adds a new `launchUrl` method corresponding to the new app-facing interface.
+
+## 2.0.5
+
+* Updates code for new analysis options.
+* Update to use the `verify` method introduced in platform_plugin_interface 2.1.0.
+
+## 2.0.4
+
+* Silenced warnings that may occur during build when using a very
+  recent version of Flutter relating to null safety.
+
+## 2.0.3
+
+* Migrate `pushRouteNameToFramework` to use ChannelBuffers API.
+
+## 2.0.2
+
+* Update platform_plugin_interface version requirement.
+
+## 2.0.1
+
+* Fix SDK range.
+
+## 2.0.0
+
+* Migrate to null safety.
+
+## 1.0.10
+
+* Update Flutter SDK constraint.
+
 ## 1.0.9
 
 * Laid the groundwork for introducing a Link widget.

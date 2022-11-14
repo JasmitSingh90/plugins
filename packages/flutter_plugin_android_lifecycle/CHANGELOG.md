@@ -1,3 +1,47 @@
+## NEXT
+
+* Updates minimum Flutter version to 2.10.
+
+## 2.0.7
+
+* Bumps gradle from 3.5.0 to 7.2.1.
+
+## 2.0.6
+
+* Adds OS version support information to README.
+* Fixes library_private_types_in_public_api, sort_child_properties_last and use_key_in_widget_constructors
+  lint warnings.
+
+## 2.0.5
+
+* Updates compileSdkVersion to 31.
+
+## 2.0.4
+
+* Updated Android lint settings.
+* Remove placeholder Dart file.
+
+## 2.0.3
+
+* Remove references to the Android V1 embedding.
+
+## 2.0.2
+
+* Migrate maven repo from jcenter to mavenCentral.
+
+## 2.0.1
+
+* Make sure androidx.lifecycle.DefaultLifecycleObservable doesn't get shrunk away.
+
+## 2.0.0
+
+* Bump Dart SDK for null-safety compatibility.
+* Fix outdated links across a number of markdown files ([#3276](https://github.com/flutter/plugins/pull/3276))
+
+## 1.0.12
+
+* Update Flutter SDK constraint.
+
 ## 1.0.11
 
 * Keep handling deprecated Android v1 classes for backward compatibility.

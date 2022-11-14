@@ -1,4 +1,4 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -15,8 +15,9 @@ const CameraPosition _kInitialPosition =
     CameraPosition(target: LatLng(-33.852, 151.211), zoom: 11.0);
 
 class SnapshotPage extends GoogleMapExampleAppPage {
-  SnapshotPage()
-      : super(const Icon(Icons.camera_alt), 'Take a snapshot of the map');
+  const SnapshotPage({Key? key})
+      : super(const Icon(Icons.camera_alt), 'Take a snapshot of the map',
+            key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +31,8 @@ class _SnapshotBody extends StatefulWidget {
 }
 
 class _SnapshotBodyState extends State<_SnapshotBody> {
-  GoogleMapController _mapController;
-  Uint8List _imageBytes;
+  GoogleMapController? _mapController;
+  Uint8List? _imageBytes;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +40,7 @@ class _SnapshotBodyState extends State<_SnapshotBody> {
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+        children: <Widget>[
           SizedBox(
             height: 180,
             child: GoogleMap(
@@ -47,10 +48,11 @@ class _SnapshotBodyState extends State<_SnapshotBody> {
               initialCameraPosition: _kInitialPosition,
             ),
           ),
-          FlatButton(
-            child: Text('Take a snapshot'),
+          TextButton(
+            child: const Text('Take a snapshot'),
             onPressed: () async {
-              final imageBytes = await _mapController?.takeSnapshot();
+              final Uint8List? imageBytes =
+                  await _mapController?.takeSnapshot();
               setState(() {
                 _imageBytes = imageBytes;
               });
@@ -59,13 +61,14 @@ class _SnapshotBodyState extends State<_SnapshotBody> {
           Container(
             decoration: BoxDecoration(color: Colors.blueGrey[50]),
             height: 180,
-            child: _imageBytes != null ? Image.memory(_imageBytes) : null,
+            child: _imageBytes != null ? Image.memory(_imageBytes!) : null,
           ),
         ],
       ),
     );
   }
 
+  // ignore: use_setters_to_change_properties
   void onMapCreated(GoogleMapController controller) {
     _mapController = controller;
   }

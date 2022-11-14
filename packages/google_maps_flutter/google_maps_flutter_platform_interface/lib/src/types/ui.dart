@@ -1,8 +1,8 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show hashValues;
+import 'package:flutter/foundation.dart';
 
 import 'types.dart';
 
@@ -31,6 +31,7 @@ enum MapType {
 // Used with [GoogleMapOptions] to wrap a [LatLngBounds] value. This allows
 // distinguishing between specifying an unbounded target (null `LatLngBounds`)
 // from not specifying anything (null `CameraTargetBounds`).
+@immutable
 class CameraTargetBounds {
   /// Creates a camera target bounds with the specified bounding box, or null
   /// to indicate that the camera target is not bounded.
@@ -39,20 +40,23 @@ class CameraTargetBounds {
   /// The geographical bounding box for the map camera target.
   ///
   /// A null value means the camera target is unbounded.
-  final LatLngBounds bounds;
+  final LatLngBounds? bounds;
 
   /// Unbounded camera target.
   static const CameraTargetBounds unbounded = CameraTargetBounds(null);
 
   /// Converts this object to something serializable in JSON.
-  dynamic toJson() => <dynamic>[bounds?.toJson()];
+  Object toJson() => <Object?>[bounds?.toJson()];
 
   @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (runtimeType != other.runtimeType) return false;
-    final CameraTargetBounds typedOther = other;
-    return bounds == typedOther.bounds;
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (runtimeType != other.runtimeType) {
+      return false;
+    }
+    return other is CameraTargetBounds && bounds == other.bounds;
   }
 
   @override
@@ -68,6 +72,7 @@ class CameraTargetBounds {
 // Used with [GoogleMapOptions] to wrap min and max zoom. This allows
 // distinguishing between specifying unbounded zooming (null `minZoom` and
 // `maxZoom`) from not specifying anything (null `MinMaxZoomPreference`).
+@immutable
 class MinMaxZoomPreference {
   /// Creates a immutable representation of the preferred minimum and maximum zoom values for the map camera.
   ///
@@ -76,28 +81,33 @@ class MinMaxZoomPreference {
       : assert(minZoom == null || maxZoom == null || minZoom <= maxZoom);
 
   /// The preferred minimum zoom level or null, if unbounded from below.
-  final double minZoom;
+  final double? minZoom;
 
   /// The preferred maximum zoom level or null, if unbounded from above.
-  final double maxZoom;
+  final double? maxZoom;
 
   /// Unbounded zooming.
   static const MinMaxZoomPreference unbounded =
       MinMaxZoomPreference(null, null);
 
   /// Converts this object to something serializable in JSON.
-  dynamic toJson() => <dynamic>[minZoom, maxZoom];
+  Object toJson() => <Object?>[minZoom, maxZoom];
 
   @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (runtimeType != other.runtimeType) return false;
-    final MinMaxZoomPreference typedOther = other;
-    return minZoom == typedOther.minZoom && maxZoom == typedOther.maxZoom;
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (runtimeType != other.runtimeType) {
+      return false;
+    }
+    return other is MinMaxZoomPreference &&
+        minZoom == other.minZoom &&
+        maxZoom == other.maxZoom;
   }
 
   @override
-  int get hashCode => hashValues(minZoom, maxZoom);
+  int get hashCode => Object.hash(minZoom, maxZoom);
 
   @override
   String toString() {

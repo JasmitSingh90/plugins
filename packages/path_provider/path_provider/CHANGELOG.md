@@ -1,3 +1,86 @@
+## NEXT
+
+* Updates code for `no_leading_underscores_for_local_identifiers` lint.
+* Updates minimum Flutter version to 2.10.
+* Fixes avoid_redundant_argument_values lint warnings and minor typos.
+
+## 2.0.11
+
+* Updates references to the obsolete master branch.
+* Fixes integration test permission issue on recent versions of macOS.
+
+## 2.0.10
+
+* Removes unnecessary imports.
+* Adds OS version support information to README.
+* Fixes library_private_types_in_public_api, sort_child_properties_last and use_key_in_widget_constructors
+  lint warnings.
+
+## 2.0.9
+
+* Updates documentation on README.md.
+* Updates example application.
+
+## 2.0.8
+
+* Updates example app Android compileSdkVersion to 31.
+* Removes obsolete manual registration of Windows and Linux implementations.
+
+## 2.0.7
+
+* Moved Android and iOS implementations to federated packages.
+
+## 2.0.6
+
+* Added support for Background Platform Channels on Android when it is
+  available.
+
+## 2.0.5
+
+* Update minimum Flutter SDK to 2.5 and iOS deployment target to 9.0.
+
+## 2.0.4
+
+* Updated Android lint settings.
+* Specify Java 8 for Android build.
+
+## 2.0.3
+
+* Add iOS unit test target.
+* Remove references to the Android V1 embedding.
+
+## 2.0.2
+
+* Migrate maven repository from jcenter to mavenCentral.
+
+## 2.0.1
+
+* Update platform_plugin_interface version requirement.
+
+## 2.0.0
+
+* Migrate to null safety.
+* BREAKING CHANGE: Path accessors that return non-nullable results will throw
+  a `MissingPlatformDirectoryException` if the platform implementation is unable
+  to get the corresponding directory (except on platforms where the method is
+  explicitly unsupported, where they will continue to throw `UnsupportedError`).
+
+## 1.6.28
+
+* Drop unused UUID dependency for tests.
+
+## 1.6.27
+
+* Update the example app: remove the deprecated `RaisedButton` and `FlatButton` widgets.
+
+## 1.6.26
+
+* Fix outdated links across a number of markdown files ([#3276](https://github.com/flutter/plugins/pull/3276))
+
+## 1.6.25
+
+* Update Flutter SDK constraint.
+
 ## 1.6.24
 
 * Remove unused `test` dependency.

@@ -1,3 +1,7 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -6,12 +10,12 @@ import './base.dart';
 
 /// A PickedFile backed by a dart:io File.
 class PickedFile extends PickedFileBase {
-  final File _file;
-
   /// Construct a PickedFile object backed by a dart:io File.
   PickedFile(String path)
       : _file = File(path),
         super(path);
+
+  final File _file;
 
   @override
   String get path {
@@ -29,9 +33,9 @@ class PickedFile extends PickedFileBase {
   }
 
   @override
-  Stream<Uint8List> openRead([int start, int end]) {
+  Stream<Uint8List> openRead([int? start, int? end]) {
     return _file
         .openRead(start ?? 0, end)
-        .map((chunk) => Uint8List.fromList(chunk));
+        .map((List<int> chunk) => Uint8List.fromList(chunk));
   }
 }

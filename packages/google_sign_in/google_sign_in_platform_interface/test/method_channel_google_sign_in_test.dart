@@ -1,18 +1,19 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart';
-import 'package:google_sign_in_platform_interface/src/types.dart';
 import 'package:google_sign_in_platform_interface/src/utils.dart';
 
 const Map<String, String> kUserData = <String, String>{
-  "email": "john.doe@gmail.com",
-  "id": "8162538176523816253123",
-  "photoUrl": "https://lh5.googleusercontent.com/photo.jpg",
-  "displayName": "John Doe",
+  'email': 'john.doe@gmail.com',
+  'id': '8162538176523816253123',
+  'photoUrl': 'https://lh5.googleusercontent.com/photo.jpg',
+  'displayName': 'John Doe',
+  'idToken': '123',
+  'serverAuthCode': '789',
 };
 
 const Map<dynamic, dynamic> kTokenData = <String, dynamic>{
@@ -29,10 +30,12 @@ const Map<String, dynamic> kDefaultResponses = <String, dynamic>{
   'disconnect': null,
   'isSignedIn': true,
   'getTokens': kTokenData,
+  'requestScopes': true,
 };
 
-final GoogleSignInUserData kUser = getUserDataFromMap(kUserData);
-final GoogleSignInTokenData kToken = getTokenDataFromMap(kTokenData);
+final GoogleSignInUserData? kUser = getUserDataFromMap(kUserData);
+final GoogleSignInTokenData kToken =
+    getTokenDataFromMap(kTokenData as Map<String, dynamic>);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -42,7 +45,8 @@ void main() {
     final MethodChannel channel = googleSignIn.channel;
 
     final List<MethodCall> log = <MethodCall>[];
-    Map<String, dynamic> responses; // Some tests mutate some kDefaultResponses
+    late Map<String, dynamic>
+        responses; // Some tests mutate some kDefaultResponses
 
     setUp(() {
       responses = Map<String, dynamic>.from(kDefaultResponses);
@@ -97,11 +101,14 @@ void main() {
               hostedDomain: 'example.com',
               scopes: <String>['two', 'scopes'],
               signInOption: SignInOption.games,
-              clientId: 'UNUSED!');
+              clientId: 'fakeClientId');
         }: isMethodCall('init', arguments: <String, dynamic>{
           'hostedDomain': 'example.com',
           'scopes': <String>['two', 'scopes'],
           'signInOption': 'SignInOption.games',
+          'clientId': 'fakeClientId',
+          'serverClientId': null,
+          'forceCodeForRefreshToken': false,
         }),
         () {
           googleSignIn.getTokens(
@@ -116,18 +123,40 @@ void main() {
           'token': 'abc',
         }),
         () {
-          googleSignIn.requestScopes(['newScope', 'anotherScope']);
+          googleSignIn.requestScopes(<String>['newScope', 'anotherScope']);
         }: isMethodCall('requestScopes', arguments: <String, dynamic>{
-          'scopes': ['newScope', 'anotherScope'],
+          'scopes': <String>['newScope', 'anotherScope'],
         }),
         googleSignIn.signOut: isMethodCall('signOut', arguments: null),
         googleSignIn.disconnect: isMethodCall('disconnect', arguments: null),
         googleSignIn.isSignedIn: isMethodCall('isSignedIn', arguments: null),
       };
 
-      tests.keys.forEach((Function f) => f());
+      for (final Function f in tests.keys) {
+        f();
+      }
 
       expect(log, tests.values);
+    });
+
+    test('initWithParams passes through arguments to the channel', () async {
+      await googleSignIn.initWithParams(const SignInInitParameters(
+          hostedDomain: 'example.com',
+          scopes: <String>['two', 'scopes'],
+          signInOption: SignInOption.games,
+          clientId: 'fakeClientId',
+          serverClientId: 'fakeServerClientId',
+          forceCodeForRefreshToken: true));
+      expect(log, <Matcher>[
+        isMethodCall('init', arguments: <String, dynamic>{
+          'hostedDomain': 'example.com',
+          'scopes': <String>['two', 'scopes'],
+          'signInOption': 'SignInOption.games',
+          'clientId': 'fakeClientId',
+          'serverClientId': 'fakeServerClientId',
+          'forceCodeForRefreshToken': true,
+        }),
+      ]);
     });
   });
 }

@@ -1,9 +1,10 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:google_maps_flutter_web/google_maps_flutter_web.dart';
 import 'package:google_maps/google_maps.dart' as gmaps;
+
+import '../../google_maps_flutter_web.dart';
 
 /// A void function that handles a [gmaps.LatLng] as a parameter.
 ///
@@ -17,10 +18,10 @@ typedef LatLngCallback = void Function(gmaps.LatLng latLng);
 /// instance and our internal `mapId` value.
 abstract class GeometryController {
   /// The GMap instance that this controller operates on.
-  gmaps.GMap googleMap;
+  late gmaps.GMap googleMap;
 
   /// The map ID for events.
-  int mapId;
+  late int mapId;
 
   /// Binds a `mapId` and the [gmaps.GMap] instance to this controller.
   void bindToMap(int mapId, gmaps.GMap googleMap) {

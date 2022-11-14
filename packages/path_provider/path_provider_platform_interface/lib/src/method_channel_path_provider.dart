@@ -1,22 +1,19 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'enums.dart';
-
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:platform/platform.dart';
+
+import '../path_provider_platform_interface.dart';
 
 /// An implementation of [PathProviderPlatform] that uses method channels.
 class MethodChannelPathProvider extends PathProviderPlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
   MethodChannel methodChannel =
-      MethodChannel('plugins.flutter.io/path_provider');
+      const MethodChannel('plugins.flutter.io/path_provider');
 
   // Ideally, this property shouldn't exist, and each platform should
   // just implement the supported methods. Once all the platforms are
@@ -26,38 +23,45 @@ class MethodChannelPathProvider extends PathProviderPlatform {
   /// This API is only exposed for the unit tests. It should not be used by
   /// any code outside of the plugin itself.
   @visibleForTesting
+  // ignore: use_setters_to_change_properties
   void setMockPathProviderPlatform(Platform platform) {
     _platform = platform;
   }
 
-  Future<String> getTemporaryPath() {
+  @override
+  Future<String?> getTemporaryPath() {
     return methodChannel.invokeMethod<String>('getTemporaryDirectory');
   }
 
-  Future<String> getApplicationSupportPath() {
+  @override
+  Future<String?> getApplicationSupportPath() {
     return methodChannel.invokeMethod<String>('getApplicationSupportDirectory');
   }
 
-  Future<String> getLibraryPath() {
+  @override
+  Future<String?> getLibraryPath() {
     if (!_platform.isIOS && !_platform.isMacOS) {
       throw UnsupportedError('Functionality only available on iOS/macOS');
     }
     return methodChannel.invokeMethod<String>('getLibraryDirectory');
   }
 
-  Future<String> getApplicationDocumentsPath() {
+  @override
+  Future<String?> getApplicationDocumentsPath() {
     return methodChannel
         .invokeMethod<String>('getApplicationDocumentsDirectory');
   }
 
-  Future<String> getExternalStoragePath() {
+  @override
+  Future<String?> getExternalStoragePath() {
     if (!_platform.isAndroid) {
       throw UnsupportedError('Functionality only available on Android');
     }
     return methodChannel.invokeMethod<String>('getStorageDirectory');
   }
 
-  Future<List<String>> getExternalCachePaths() {
+  @override
+  Future<List<String>?> getExternalCachePaths() {
     if (!_platform.isAndroid) {
       throw UnsupportedError('Functionality only available on Android');
     }
@@ -65,8 +69,9 @@ class MethodChannelPathProvider extends PathProviderPlatform {
         .invokeListMethod<String>('getExternalCacheDirectories');
   }
 
-  Future<List<String>> getExternalStoragePaths({
-    StorageDirectory type,
+  @override
+  Future<List<String>?> getExternalStoragePaths({
+    StorageDirectory? type,
   }) async {
     if (!_platform.isAndroid) {
       throw UnsupportedError('Functionality only available on Android');
@@ -77,7 +82,8 @@ class MethodChannelPathProvider extends PathProviderPlatform {
     );
   }
 
-  Future<String> getDownloadsPath() {
+  @override
+  Future<String?> getDownloadsPath() {
     if (!_platform.isMacOS) {
       throw UnsupportedError('Functionality only available on macOS');
     }

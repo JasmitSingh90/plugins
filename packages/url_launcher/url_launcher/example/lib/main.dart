@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,13 +7,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:url_launcher/link.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -21,88 +24,85 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'URL Launcher'),
+      home: const MyHomePage(title: 'URL Launcher'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Future<void> _launched;
+  bool _hasCallSupport = false;
+  Future<void>? _launched;
   String _phone = '';
 
-  Future<void> _launchInBrowser(String url) async {
-    if (await canLaunch(url)) {
-      await launch(
-        url,
-        forceSafariVC: false,
-        forceWebView: false,
-        headers: <String, String>{'my_header_key': 'my_header_value'},
-      );
-    } else {
+  @override
+  void initState() {
+    super.initState();
+    // Check for phone call support.
+    canLaunchUrl(Uri(scheme: 'tel', path: '123')).then((bool result) {
+      setState(() {
+        _hasCallSupport = result;
+      });
+    });
+  }
+
+  Future<void> _launchInBrowser(Uri url) async {
+    if (!await launchUrl(
+      url,
+      mode: LaunchMode.externalApplication,
+    )) {
       throw 'Could not launch $url';
     }
   }
 
-  Future<void> _launchInWebViewOrVC(String url) async {
-    if (await canLaunch(url)) {
-      await launch(
-        url,
-        forceSafariVC: true,
-        forceWebView: true,
-        headers: <String, String>{'my_header_key': 'my_header_value'},
-      );
-    } else {
+  Future<void> _launchInWebViewOrVC(Uri url) async {
+    if (!await launchUrl(
+      url,
+      mode: LaunchMode.inAppWebView,
+      webViewConfiguration: const WebViewConfiguration(
+          headers: <String, String>{'my_header_key': 'my_header_value'}),
+    )) {
       throw 'Could not launch $url';
     }
   }
 
-  Future<void> _launchInWebViewWithJavaScript(String url) async {
-    if (await canLaunch(url)) {
-      await launch(
-        url,
-        forceSafariVC: true,
-        forceWebView: true,
-        enableJavaScript: true,
-      );
-    } else {
+  Future<void> _launchInWebViewWithoutJavaScript(Uri url) async {
+    if (!await launchUrl(
+      url,
+      mode: LaunchMode.inAppWebView,
+      webViewConfiguration: const WebViewConfiguration(enableJavaScript: false),
+    )) {
       throw 'Could not launch $url';
     }
   }
 
-  Future<void> _launchInWebViewWithDomStorage(String url) async {
-    if (await canLaunch(url)) {
-      await launch(
-        url,
-        forceSafariVC: true,
-        forceWebView: true,
-        enableDomStorage: true,
-      );
-    } else {
+  Future<void> _launchInWebViewWithoutDomStorage(Uri url) async {
+    if (!await launchUrl(
+      url,
+      mode: LaunchMode.inAppWebView,
+      webViewConfiguration: const WebViewConfiguration(enableDomStorage: false),
+    )) {
       throw 'Could not launch $url';
     }
   }
 
-  Future<void> _launchUniversalLinkIos(String url) async {
-    if (await canLaunch(url)) {
-      final bool nativeAppLaunchSucceeded = await launch(
+  Future<void> _launchUniversalLinkIos(Uri url) async {
+    final bool nativeAppLaunchSucceeded = await launchUrl(
+      url,
+      mode: LaunchMode.externalNonBrowserApplication,
+    );
+    if (!nativeAppLaunchSucceeded) {
+      await launchUrl(
         url,
-        forceSafariVC: false,
-        universalLinksOnly: true,
+        mode: LaunchMode.inAppWebView,
       );
-      if (!nativeAppLaunchSucceeded) {
-        await launch(
-          url,
-          forceSafariVC: true,
-        );
-      }
     }
   }
 
@@ -114,17 +114,20 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Future<void> _makePhoneCall(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    await launchUrl(launchUri);
   }
 
   @override
   Widget build(BuildContext context) {
-    const String toLaunch = 'https://www.cylog.org/headers/';
+    // onPressed calls using this URL are not gated on a 'canLaunch' check
+    // because the assumption is that every device can launch a web URL.
+    final Uri toLaunch =
+        Uri(scheme: 'https', host: 'www.cylog.org', path: 'headers/');
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -141,43 +144,47 @@ class _MyHomePageState extends State<MyHomePage> {
                     decoration: const InputDecoration(
                         hintText: 'Input the phone number to launch')),
               ),
-              RaisedButton(
-                onPressed: () => setState(() {
-                  _launched = _makePhoneCall('tel:$_phone');
-                }),
-                child: const Text('Make phone call'),
+              ElevatedButton(
+                onPressed: _hasCallSupport
+                    ? () => setState(() {
+                          _launched = _makePhoneCall(_phone);
+                        })
+                    : null,
+                child: _hasCallSupport
+                    ? const Text('Make phone call')
+                    : const Text('Calling not supported'),
               ),
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(toLaunch),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(toLaunch.toString()),
               ),
-              RaisedButton(
+              ElevatedButton(
                 onPressed: () => setState(() {
                   _launched = _launchInBrowser(toLaunch);
                 }),
                 child: const Text('Launch in browser'),
               ),
               const Padding(padding: EdgeInsets.all(16.0)),
-              RaisedButton(
+              ElevatedButton(
                 onPressed: () => setState(() {
                   _launched = _launchInWebViewOrVC(toLaunch);
                 }),
                 child: const Text('Launch in app'),
               ),
-              RaisedButton(
+              ElevatedButton(
                 onPressed: () => setState(() {
-                  _launched = _launchInWebViewWithJavaScript(toLaunch);
+                  _launched = _launchInWebViewWithoutJavaScript(toLaunch);
                 }),
-                child: const Text('Launch in app(JavaScript ON)'),
+                child: const Text('Launch in app (JavaScript OFF)'),
               ),
-              RaisedButton(
+              ElevatedButton(
                 onPressed: () => setState(() {
-                  _launched = _launchInWebViewWithDomStorage(toLaunch);
+                  _launched = _launchInWebViewWithoutDomStorage(toLaunch);
                 }),
-                child: const Text('Launch in app(DOM storage ON)'),
+                child: const Text('Launch in app (DOM storage OFF)'),
               ),
               const Padding(padding: EdgeInsets.all(16.0)),
-              RaisedButton(
+              ElevatedButton(
                 onPressed: () => setState(() {
                   _launched = _launchUniversalLinkIos(toLaunch);
                 }),
@@ -185,15 +192,28 @@ class _MyHomePageState extends State<MyHomePage> {
                     'Launch a universal link in a native app, fallback to Safari.(Youtube)'),
               ),
               const Padding(padding: EdgeInsets.all(16.0)),
-              RaisedButton(
+              ElevatedButton(
                 onPressed: () => setState(() {
                   _launched = _launchInWebViewOrVC(toLaunch);
                   Timer(const Duration(seconds: 5), () {
                     print('Closing WebView after 5 seconds...');
-                    closeWebView();
+                    closeInAppWebView();
                   });
                 }),
                 child: const Text('Launch in app + close after 5 seconds'),
+              ),
+              const Padding(padding: EdgeInsets.all(16.0)),
+              Link(
+                uri: Uri.parse(
+                    'https://pub.dev/documentation/url_launcher/latest/link/link-library.html'),
+                target: LinkTarget.blank,
+                builder: (BuildContext ctx, FollowLink? openLink) {
+                  return TextButton.icon(
+                    onPressed: openLink,
+                    label: const Text('Link Widget documentation'),
+                    icon: const Icon(Icons.read_more),
+                  );
+                },
               ),
               const Padding(padding: EdgeInsets.all(16.0)),
               FutureBuilder<void>(future: _launched, builder: _launchStatus),

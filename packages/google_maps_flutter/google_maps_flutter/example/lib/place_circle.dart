@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,7 +10,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'page.dart';
 
 class PlaceCirclePage extends GoogleMapExampleAppPage {
-  PlaceCirclePage() : super(const Icon(Icons.linear_scale), 'Place circle');
+  const PlaceCirclePage({Key? key})
+      : super(const Icon(Icons.linear_scale), 'Place circle', key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,7 @@ class PlaceCirclePage extends GoogleMapExampleAppPage {
 }
 
 class PlaceCircleBody extends StatefulWidget {
-  const PlaceCircleBody();
+  const PlaceCircleBody({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => PlaceCircleBodyState();
@@ -28,10 +29,10 @@ class PlaceCircleBody extends StatefulWidget {
 class PlaceCircleBodyState extends State<PlaceCircleBody> {
   PlaceCircleBodyState();
 
-  GoogleMapController controller;
+  GoogleMapController? controller;
   Map<CircleId, Circle> circles = <CircleId, Circle>{};
   int _circleIdCounter = 1;
-  CircleId selectedCircle;
+  CircleId? selectedCircle;
 
   // Values when toggling circle color
   int fillColorsIndex = 0;
@@ -47,6 +48,7 @@ class PlaceCircleBodyState extends State<PlaceCircleBody> {
   int widthsIndex = 0;
   List<int> widths = <int>[10, 20, 5];
 
+  // ignore: use_setters_to_change_properties
   void _onMapCreated(GoogleMapController controller) {
     this.controller = controller;
   }
@@ -62,12 +64,14 @@ class PlaceCircleBodyState extends State<PlaceCircleBody> {
     });
   }
 
-  void _remove() {
+  void _remove(CircleId circleId) {
     setState(() {
-      if (circles.containsKey(selectedCircle)) {
-        circles.remove(selectedCircle);
+      if (circles.containsKey(circleId)) {
+        circles.remove(circleId);
       }
-      selectedCircle = null;
+      if (circleId == selectedCircle) {
+        selectedCircle = null;
+      }
     });
   }
 
@@ -100,37 +104,37 @@ class PlaceCircleBodyState extends State<PlaceCircleBody> {
     });
   }
 
-  void _toggleVisible() {
-    final Circle circle = circles[selectedCircle];
+  void _toggleVisible(CircleId circleId) {
+    final Circle circle = circles[circleId]!;
     setState(() {
-      circles[selectedCircle] = circle.copyWith(
+      circles[circleId] = circle.copyWith(
         visibleParam: !circle.visible,
       );
     });
   }
 
-  void _changeFillColor() {
-    final Circle circle = circles[selectedCircle];
+  void _changeFillColor(CircleId circleId) {
+    final Circle circle = circles[circleId]!;
     setState(() {
-      circles[selectedCircle] = circle.copyWith(
+      circles[circleId] = circle.copyWith(
         fillColorParam: colors[++fillColorsIndex % colors.length],
       );
     });
   }
 
-  void _changeStrokeColor() {
-    final Circle circle = circles[selectedCircle];
+  void _changeStrokeColor(CircleId circleId) {
+    final Circle circle = circles[circleId]!;
     setState(() {
-      circles[selectedCircle] = circle.copyWith(
+      circles[circleId] = circle.copyWith(
         strokeColorParam: colors[++strokeColorsIndex % colors.length],
       );
     });
   }
 
-  void _changeStrokeWidth() {
-    final Circle circle = circles[selectedCircle];
+  void _changeStrokeWidth(CircleId circleId) {
+    final Circle circle = circles[circleId]!;
     setState(() {
-      circles[selectedCircle] = circle.copyWith(
+      circles[circleId] = circle.copyWith(
         strokeWidthParam: widths[++widthsIndex % widths.length],
       );
     });
@@ -138,6 +142,7 @@ class PlaceCircleBodyState extends State<PlaceCircleBody> {
 
   @override
   Widget build(BuildContext context) {
+    final CircleId? selectedId = selectedCircle;
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -165,40 +170,43 @@ class PlaceCircleBodyState extends State<PlaceCircleBody> {
                   children: <Widget>[
                     Column(
                       children: <Widget>[
-                        FlatButton(
-                          child: const Text('add'),
+                        TextButton(
                           onPressed: _add,
+                          child: const Text('add'),
                         ),
-                        FlatButton(
+                        TextButton(
+                          onPressed: (selectedId == null)
+                              ? null
+                              : () => _remove(selectedId),
                           child: const Text('remove'),
-                          onPressed: (selectedCircle == null) ? null : _remove,
                         ),
-                        FlatButton(
+                        TextButton(
+                          onPressed: (selectedId == null)
+                              ? null
+                              : () => _toggleVisible(selectedId),
                           child: const Text('toggle visible'),
-                          onPressed:
-                              (selectedCircle == null) ? null : _toggleVisible,
                         ),
                       ],
                     ),
                     Column(
                       children: <Widget>[
-                        FlatButton(
+                        TextButton(
+                          onPressed: (selectedId == null)
+                              ? null
+                              : () => _changeStrokeWidth(selectedId),
                           child: const Text('change stroke width'),
-                          onPressed: (selectedCircle == null)
-                              ? null
-                              : _changeStrokeWidth,
                         ),
-                        FlatButton(
+                        TextButton(
+                          onPressed: (selectedId == null)
+                              ? null
+                              : () => _changeStrokeColor(selectedId),
                           child: const Text('change stroke color'),
-                          onPressed: (selectedCircle == null)
-                              ? null
-                              : _changeStrokeColor,
                         ),
-                        FlatButton(
-                          child: const Text('change fill color'),
-                          onPressed: (selectedCircle == null)
+                        TextButton(
+                          onPressed: (selectedId == null)
                               ? null
-                              : _changeFillColor,
+                              : () => _changeFillColor(selectedId),
+                          child: const Text('change fill color'),
                         ),
                       ],
                     )

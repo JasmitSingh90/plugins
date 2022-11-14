@@ -1,12 +1,16 @@
 # Google Maps for Flutter
 
-[![pub package](https://img.shields.io/pub/v/google_maps_flutter.svg)](https://pub.dartlang.org/packages/google_maps_flutter)
+[![pub package](https://img.shields.io/pub/v/google_maps_flutter.svg)](https://pub.dev/packages/google_maps_flutter)
 
 A Flutter plugin that provides a [Google Maps](https://developers.google.com/maps/) widget.
 
+|             | Android | iOS    |
+|-------------|---------|--------|
+| **Support** | SDK 20+ | iOS 9+ |
+
 ## Usage
 
-To use this plugin, add `google_maps_flutter` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/).
+To use this plugin, add `google_maps_flutter` as a [dependency in your pubspec.yaml file](https://flutter.dev/docs/development/platform-integration/platform-channels).
 
 ## Getting Started
 
@@ -21,11 +25,23 @@ To use this plugin, add `google_maps_flutter` as a [dependency in your pubspec.y
   * To enable Google Maps for iOS, select "Maps SDK for iOS" in the "Additional APIs" section, then select "ENABLE".
   * Make sure the APIs you enabled are under the "Enabled APIs" section.
 
-* You can also find detailed steps to get start with Google Maps Platform [here](https://developers.google.com/maps/gmp-get-started).
+For more details, see [Getting started with Google Maps Platform](https://developers.google.com/maps/gmp-get-started).
 
 ### Android
 
-Specify your API key in the application manifest `android/app/src/main/AndroidManifest.xml`:
+1. Set the `minSdkVersion` in `android/app/build.gradle`:
+
+```groovy
+android {
+    defaultConfig {
+        minSdkVersion 20
+    }
+}
+```
+
+This means that app will only be available for users that run Android SDK 20 or higher.
+
+2. Specify your API key in the application manifest `android/app/src/main/AndroidManifest.xml`:
 
 ```xml
 <manifest ...
@@ -34,9 +50,15 @@ Specify your API key in the application manifest `android/app/src/main/AndroidMa
                android:value="YOUR KEY HERE"/>
 ```
 
+#### Display Mode
+
+The Android implementation supports multiple
+[platform view display modes](https://flutter.dev/docs/development/platform-integration/platform-views).
+For details, see [the Android README](https://pub.dev/packages/google_maps_flutter_android#display-mode).
+
 ### iOS
 
-Specify your API key in the application delegate `ios/Runner/AppDelegate.m`:
+To set up, specify your API key in the application delegate `ios/Runner/AppDelegate.m`:
 
 ```objectivec
 #include "AppDelegate.h"

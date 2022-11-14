@@ -1,4 +1,4 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,7 +7,7 @@ import 'dart:convert' show json;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:path/path.dart' as path;
 import 'package:path_provider_linux/path_provider_linux.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
@@ -16,20 +16,33 @@ import 'package:shared_preferences_platform_interface/shared_preferences_platfor
 ///
 /// This class implements the `package:shared_preferences` functionality for Linux.
 class SharedPreferencesLinux extends SharedPreferencesStorePlatform {
-  /// The default instance of [SharedPreferencesLinux] to use.
+  /// Deprecated instance of [SharedPreferencesLinux].
+  /// Use [SharedPreferencesStorePlatform.instance] instead.
+  @Deprecated('Use `SharedPreferencesStorePlatform.instance` instead.')
   static SharedPreferencesLinux instance = SharedPreferencesLinux();
 
+  /// Registers the Linux implementation.
+  static void registerWith() {
+    SharedPreferencesStorePlatform.instance = SharedPreferencesLinux();
+  }
+
   /// Local copy of preferences
-  Map<String, Object> _cachedPreferences;
+  Map<String, Object>? _cachedPreferences;
 
   /// File system used to store to disk. Exposed for testing only.
   @visibleForTesting
-  FileSystem fs = LocalFileSystem();
+  FileSystem fs = const LocalFileSystem();
+
+  /// The path_provider_linux instance used to find the support directory.
+  @visibleForTesting
+  PathProviderLinux pathProvider = PathProviderLinux();
 
   /// Gets the file where the preferences are stored.
-  Future<File> _getLocalDataFile() async {
-    final pathProvider = PathProviderLinux();
-    final directory = await pathProvider.getApplicationSupportPath();
+  Future<File?> _getLocalDataFile() async {
+    final String? directory = await pathProvider.getApplicationSupportPath();
+    if (directory == null) {
+      return null;
+    }
     return fs.file(path.join(directory, 'shared_preferences.json'));
   }
 
@@ -37,33 +50,40 @@ class SharedPreferencesLinux extends SharedPreferencesStorePlatform {
   /// maintained in memory.
   Future<Map<String, Object>> _readPreferences() async {
     if (_cachedPreferences != null) {
-      return _cachedPreferences;
+      return _cachedPreferences!;
     }
 
-    _cachedPreferences = {};
-    var localDataFile = await _getLocalDataFile();
-    if (localDataFile.existsSync()) {
-      String stringMap = localDataFile.readAsStringSync();
+    Map<String, Object> preferences = <String, Object>{};
+    final File? localDataFile = await _getLocalDataFile();
+    if (localDataFile != null && localDataFile.existsSync()) {
+      final String stringMap = localDataFile.readAsStringSync();
       if (stringMap.isNotEmpty) {
-        _cachedPreferences = json.decode(stringMap) as Map<String, Object>;
+        final Object? data = json.decode(stringMap);
+        if (data is Map) {
+          preferences = data.cast<String, Object>();
+        }
       }
     }
-
-    return _cachedPreferences;
+    _cachedPreferences = preferences;
+    return preferences;
   }
 
   /// Writes the cached preferences to disk. Returns [true] if the operation
   /// succeeded.
   Future<bool> _writePreferences(Map<String, Object> preferences) async {
     try {
-      var localDataFile = await _getLocalDataFile();
+      final File? localDataFile = await _getLocalDataFile();
+      if (localDataFile == null) {
+        print('Unable to determine where to write preferences.');
+        return false;
+      }
       if (!localDataFile.existsSync()) {
         localDataFile.createSync(recursive: true);
       }
-      var stringMap = json.encode(preferences);
+      final String stringMap = json.encode(preferences);
       localDataFile.writeAsStringSync(stringMap);
     } catch (e) {
-      print("Error saving preferences to disk: $e");
+      print('Error saving preferences to disk: $e');
       return false;
     }
     return true;
@@ -71,7 +91,7 @@ class SharedPreferencesLinux extends SharedPreferencesStorePlatform {
 
   @override
   Future<bool> clear() async {
-    var preferences = await _readPreferences();
+    final Map<String, Object> preferences = await _readPreferences();
     preferences.clear();
     return _writePreferences(preferences);
   }
@@ -83,14 +103,14 @@ class SharedPreferencesLinux extends SharedPreferencesStorePlatform {
 
   @override
   Future<bool> remove(String key) async {
-    var preferences = await _readPreferences();
+    final Map<String, Object> preferences = await _readPreferences();
     preferences.remove(key);
     return _writePreferences(preferences);
   }
 
   @override
   Future<bool> setValue(String valueType, String key, Object value) async {
-    var preferences = await _readPreferences();
+    final Map<String, Object> preferences = await _readPreferences();
     preferences[key] = value;
     return _writePreferences(preferences);
   }

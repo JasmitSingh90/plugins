@@ -1,6 +1,6 @@
 # plugin_platform_interface
 
-This package provides a base class for platform interfaces of [federated flutter plugins](https://fluter.dev/go/federated-plugins).
+This package provides a base class for platform interfaces of [federated flutter plugins](https://flutter.dev/go/federated-plugins).
 
 Platform implementations should extend their platform interface classes rather than implement it as
 newly added methods to platform interfaces are not considered as breaking changes. Extending a platform
@@ -25,7 +25,7 @@ abstract class UrlLauncherPlatform extends PlatformInterface {
   /// Platform-specific plugins should set this with their own platform-specific
   /// class that extends [UrlLauncherPlatform] when they register themselves.
   static set instance(UrlLauncherPlatform instance) {
-    PlatformInterface.verifyToken(instance, _token);
+    PlatformInterface.verify(instance, _token);
     _instance = instance;
   }
 
@@ -35,14 +35,15 @@ abstract class UrlLauncherPlatform extends PlatformInterface {
 This guarantees that UrlLauncherPlatform.instance cannot be set to an object that `implements`
 UrlLauncherPlatform (it can only be set to an object that `extends` UrlLauncherPlatform).
 
-## Mocking platform interfaces with Mockito
+## Mocking or faking platform interfaces
 
 
-Mockito mocks of platform interfaces will fail the verification done by `verifyToken`.
-This package provides a `MockPlatformInterfaceMixin` which can be used in test code only to disable
-the `extends` enforcement.
+Test implementations of platform interfaces, such as those using `mockito`'s
+`Mock` or `test`'s `Fake`, will fail the verification done by `verify`.
+This package provides a `MockPlatformInterfaceMixin` which can be used in test
+code only to disable the `extends` enforcement.
 
-A Mockito mock of a platform interface can be created with:
+For example, a Mockito mock of a platform interface can be created with:
 
 ```dart
 class UrlLauncherPlatformMock extends Mock

@@ -1,7 +1,8 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/widgets.dart';
 import 'package:quiver/core.dart';
 
 /// Default configuration options to use when signing in.
@@ -22,17 +23,80 @@ enum SignInOption {
   games
 }
 
+/// The parameters to use when initializing the sign in process.
+///
+/// See:
+/// https://developers.google.com/identity/sign-in/web/reference#gapiauth2initparams
+@immutable
+class SignInInitParameters {
+  /// The parameters to use when initializing the sign in process.
+  const SignInInitParameters({
+    this.scopes = const <String>[],
+    this.signInOption = SignInOption.standard,
+    this.hostedDomain,
+    this.clientId,
+    this.serverClientId,
+    this.forceCodeForRefreshToken = false,
+  });
+
+  /// The list of OAuth scope codes to request when signing in.
+  final List<String> scopes;
+
+  /// The user experience to use when signing in. [SignInOption.games] is
+  /// only supported on Android.
+  final SignInOption signInOption;
+
+  /// Restricts sign in to accounts of the user in the specified domain.
+  /// By default, the list of accounts will not be restricted.
+  final String? hostedDomain;
+
+  /// The OAuth client ID of the app.
+  ///
+  /// The default is null, which means that the client ID will be sourced from a
+  /// configuration file, if required on the current platform. A value specified
+  /// here takes precedence over a value specified in a configuration file.
+  /// See also:
+  ///
+  ///   * [Platform Integration](https://github.com/flutter/plugins/tree/main/packages/google_sign_in/google_sign_in#platform-integration),
+  ///     where you can find the details about the configuration files.
+  final String? clientId;
+
+  /// The OAuth client ID of the backend server.
+  ///
+  /// The default is null, which means that the server client ID will be sourced
+  /// from a configuration file, if available and supported on the current
+  /// platform. A value specified here takes precedence over a value specified
+  /// in a configuration file.
+  ///
+  /// See also:
+  ///
+  ///   * [Platform Integration](https://github.com/flutter/plugins/tree/main/packages/google_sign_in/google_sign_in#platform-integration),
+  ///     where you can find the details about the configuration files.
+  final String? serverClientId;
+
+  /// If true, ensures the authorization code can be exchanged for an access
+  /// token.
+  ///
+  /// This is only used on Android.
+  final bool forceCodeForRefreshToken;
+}
+
 /// Holds information about the signed in user.
 class GoogleSignInUserData {
-  /// Uses the given data to construct an instance. Any of these parameters
-  /// could be null.
-  GoogleSignInUserData(
-      {this.displayName, this.email, this.id, this.photoUrl, this.idToken});
+  /// Uses the given data to construct an instance.
+  GoogleSignInUserData({
+    required this.email,
+    required this.id,
+    this.displayName,
+    this.photoUrl,
+    this.idToken,
+    this.serverAuthCode,
+  });
 
   /// The display name of the signed in user.
   ///
   /// Not guaranteed to be present for all users, even when configured.
-  String displayName;
+  String? displayName;
 
   /// The email address of the signed in user.
   ///
@@ -56,32 +120,44 @@ class GoogleSignInUserData {
   /// The photo url of the signed in user if the user has a profile picture.
   ///
   /// Not guaranteed to be present for all users, even when configured.
-  String photoUrl;
+  String? photoUrl;
 
   /// A token that can be sent to your own server to verify the authentication
   /// data.
-  String idToken;
+  String? idToken;
+
+  /// Server auth code used to access Google Login
+  String? serverAuthCode;
 
   @override
-  int get hashCode =>
-      hashObjects(<String>[displayName, email, id, photoUrl, idToken]);
+  // TODO(stuartmorgan): Make this class immutable in the next breaking change.
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => hashObjects(
+      <String?>[displayName, email, id, photoUrl, idToken, serverAuthCode]);
 
   @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (other is! GoogleSignInUserData) return false;
+  // TODO(stuartmorgan): Make this class immutable in the next breaking change.
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! GoogleSignInUserData) {
+      return false;
+    }
     final GoogleSignInUserData otherUserData = other;
     return otherUserData.displayName == displayName &&
         otherUserData.email == email &&
         otherUserData.id == id &&
         otherUserData.photoUrl == photoUrl &&
-        otherUserData.idToken == idToken;
+        otherUserData.idToken == idToken &&
+        otherUserData.serverAuthCode == serverAuthCode;
   }
 }
 
 /// Holds authentication data after sign in.
 class GoogleSignInTokenData {
-  /// Either or both parameters may be null.
+  /// Build `GoogleSignInTokenData`.
   GoogleSignInTokenData({
     this.idToken,
     this.accessToken,
@@ -89,21 +165,29 @@ class GoogleSignInTokenData {
   });
 
   /// An OpenID Connect ID token for the authenticated user.
-  String idToken;
+  String? idToken;
 
   /// The OAuth2 access token used to access Google services.
-  String accessToken;
+  String? accessToken;
 
   /// Server auth code used to access Google Login
-  String serverAuthCode;
+  String? serverAuthCode;
 
   @override
+  // TODO(stuartmorgan): Make this class immutable in the next breaking change.
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
   int get hashCode => hash3(idToken, accessToken, serverAuthCode);
 
   @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (other is! GoogleSignInTokenData) return false;
+  // TODO(stuartmorgan): Make this class immutable in the next breaking change.
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! GoogleSignInTokenData) {
+      return false;
+    }
     final GoogleSignInTokenData otherTokenData = other;
     return otherTokenData.idToken == idToken &&
         otherTokenData.accessToken == accessToken &&

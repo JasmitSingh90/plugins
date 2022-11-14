@@ -1,3 +1,230 @@
+## NEXT
+
+* Updates code for `no_leading_underscores_for_local_identifiers` lint.
+
+## 2.4.7
+
+* Updates README via code excerpts.
+* Fixes violations of new analysis option use_named_constants.
+
+## 2.4.6
+
+* Fixes avoid_redundant_argument_values lint warnings and minor typos.
+
+## 2.4.5
+
+* Ignores unnecessary import warnings in preparation for [upcoming Flutter changes](https://github.com/flutter/flutter/pull/104231).
+* Fixes an exception when a disposed VideoPlayerController is disposed again.
+
+## 2.4.4
+
+* Updates references to the obsolete master branch.
+
+## 2.4.3
+
+* Fixes Android to correctly display videos recorded in landscapeRight ([#60327](https://github.com/flutter/flutter/issues/60327)).
+* Fixes order-dependent unit tests.
+
+## 2.4.2
+
+* Minor fixes for new analysis options.
+
+## 2.4.1
+
+* Removes unnecessary imports.
+* Fixes library_private_types_in_public_api, sort_child_properties_last and use_key_in_widget_constructors
+  lint warnings.
+
+## 2.4.0
+
+* Updates minimum Flutter version to 2.10.
+* Adds OS version support information to README.
+* Adds `setClosedCaptionFile` method to `VideoPlayerController`.
+
+## 2.3.0
+
+* Adds `allowBackgroundPlayback` to `VideoPlayerOptions`.
+
+## 2.2.19
+
+* Internal code cleanup for stricter analysis options.
+
+## 2.2.18
+
+* Moves Android and iOS implementations to federated packages.
+* Update audio URL in iOS tests.
+
+## 2.2.17
+
+* Avoid blocking the main thread loading video count on iOS.
+
+## 2.2.16
+
+* Introduces `setCaptionOffset` to offset the caption display based on a Duration.
+
+## 2.2.15
+
+* Updates README discussion of permissions.
+
+## 2.2.14
+
+* Removes KVO observer on AVPlayerItem on iOS.
+
+## 2.2.13
+
+* Fixes persisting of hasError even after successful initialize.
+
+## 2.2.12
+
+* iOS: Validate size only when assets contain video tracks.
+
+## 2.2.11
+
+* Removes dependency on `meta`.
+
+## 2.2.10
+
+* iOS: Updates texture on `seekTo`.
+
+## 2.2.9
+
+* Adds compatibility with `video_player_platform_interface` 5.0, which does not
+  include non-dev test dependencies.
+
+## 2.2.8
+
+* Changes the way the `VideoPlayerPlatform` instance is cached in the
+  controller, so that it's no longer impossible to change after the first use.
+* Updates unit tests to be self-contained.
+* Fixes integration tests.
+* Updates Android compileSdkVersion to 31.
+* Fixes a flaky integration test.
+* Integration tests now use WebM on web, to allow running with Chromium.
+
+## 2.2.7
+
+* Fixes a regression where dragging a [VideoProgressIndicator] while playing
+  would restart playback from the start of the video.
+
+## 2.2.6
+
+* Initialize player when size and duration become available on iOS
+
+## 2.2.5
+
+* Support to closed caption WebVTT format added.
+
+## 2.2.4
+
+* Update minimum Flutter SDK to 2.5 and iOS deployment target to 9.0.
+
+## 2.2.3
+
+* Fixed empty caption text still showing the caption widget.
+
+## 2.2.2
+
+* Fix a disposed `VideoPlayerController` throwing an exception when being replaced in the `VideoPlayer`.
+
+## 2.2.1
+
+* Specify Java 8 for Android build.
+
+## 2.2.0
+
+* Add `contentUri` based VideoPlayerController.
+
+## 2.1.15
+
+* Ensured seekTo isn't called before video player is initialized. Fixes [#89259](https://github.com/flutter/flutter/issues/89259).
+* Updated Android lint settings.
+
+## 2.1.14
+
+* Removed dependency on the `flutter_test` package.
+
+## 2.1.13
+
+* Removed obsolete warning about not working in iOS simulators from README.
+
+## 2.1.12
+
+* Update the video url in the readme code sample
+
+## 2.1.11
+
+* Remove references to the Android V1 embedding.
+
+## 2.1.10
+
+* Ensure video pauses correctly when it finishes.
+
+## 2.1.9
+
+* Silenced warnings that may occur during build when using a very
+  recent version of Flutter relating to null safety.
+
+## 2.1.8
+
+* Refactor `FLTCMTimeToMillis` to support indefinite streams. Fixes [#48670](https://github.com/flutter/flutter/issues/48670).
+
+## 2.1.7
+
+* Update exoplayer to 2.14.1, removing dependency on Bintray.
+
+## 2.1.6
+
+* Remove obsolete pre-1.0 warning from README.
+* Add iOS unit and UI integration test targets.
+
+## 2.1.5
+
+* Update example code in README to fix broken url.
+
+## 2.1.4
+
+* Add an exoplayer URL to the maven repositories to address
+  a possible build regression in 2.1.2.
+
+## 2.1.3
+
+* Fix pointer value to boolean conversion analyzer warnings.
+
+## 2.1.2
+
+* Migrate maven repository from jcenter to mavenCentral.
+
+## 2.1.1
+
+* Update example code in README to reflect API changes.
+
+## 2.1.0
+
+* Add `httpHeaders` option to `VideoPlayerController.network`
+
+## 2.0.2
+
+* Fix `VideoPlayerValue` size and aspect ratio documentation
+
+## 2.0.1
+
+* Remove the deprecated API "exoPlayer.setAudioAttributes".
+
+## 2.0.0
+
+* Migrate to null safety.
+* Fix an issue where `isBuffering` was not updating on Android.
+* Fix outdated links across a number of markdown files ([#3276](https://github.com/flutter/plugins/pull/3276))
+* Fix `VideoPlayerValue toString()` test.
+* Update the example app: remove the deprecated `RaisedButton` and `FlatButton` widgets.
+* Migrate from deprecated `defaultBinaryMessenger`.
+* Fix an issue where a crash can occur after a closing a video player view on iOS.
+* Setting the `mixWithOthers` `VideoPlayerOptions` in web now is silently ignored instead of throwing an exception.
+
+## 1.0.2
+
+* Update Flutter SDK constraint.
+
 ## 1.0.1
 
 * Android: Dispose video players when app is closed.

@@ -1,10 +1,10 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart' show VoidCallback;
+import 'package:flutter/foundation.dart' show immutable;
 import 'package:flutter/material.dart' show Color, Colors;
-import 'package:meta/meta.dart' show immutable, required;
 
 import 'types.dart';
 
@@ -12,36 +12,17 @@ import 'types.dart';
 ///
 /// This does not have to be globally unique, only unique among the list.
 @immutable
-class CircleId {
+class CircleId extends MapsObjectId<Circle> {
   /// Creates an immutable identifier for a [Circle].
-  CircleId(this.value) : assert(value != null);
-
-  /// value of the [CircleId].
-  final String value;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    final CircleId typedOther = other;
-    return value == typedOther.value;
-  }
-
-  @override
-  int get hashCode => value.hashCode;
-
-  @override
-  String toString() {
-    return 'CircleId{value: $value}';
-  }
+  const CircleId(String value) : super(value);
 }
 
 /// Draws a circle on the map.
 @immutable
-class Circle {
+class Circle implements MapsObject<Circle> {
   /// Creates an immutable representation of a [Circle] to draw on [GoogleMap].
   const Circle({
-    @required this.circleId,
+    required this.circleId,
     this.consumeTapEvents = false,
     this.fillColor = Colors.transparent,
     this.center = const LatLng(0.0, 0.0),
@@ -55,6 +36,9 @@ class Circle {
 
   /// Uniquely identifies a [Circle].
   final CircleId circleId;
+
+  @override
+  CircleId get mapsId => circleId;
 
   /// True if the [Circle] consumes tap events.
   ///
@@ -91,20 +75,20 @@ class Circle {
   final int zIndex;
 
   /// Callbacks to receive tap events for circle placed on this map.
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   /// Creates a new [Circle] object whose values are the same as this instance,
   /// unless overwritten by the specified parameters.
   Circle copyWith({
-    bool consumeTapEventsParam,
-    Color fillColorParam,
-    LatLng centerParam,
-    double radiusParam,
-    Color strokeColorParam,
-    int strokeWidthParam,
-    bool visibleParam,
-    int zIndexParam,
-    VoidCallback onTapParam,
+    bool? consumeTapEventsParam,
+    Color? fillColorParam,
+    LatLng? centerParam,
+    double? radiusParam,
+    Color? strokeColorParam,
+    int? strokeWidthParam,
+    bool? visibleParam,
+    int? zIndexParam,
+    VoidCallback? onTapParam,
   }) {
     return Circle(
       circleId: circleId,
@@ -121,13 +105,15 @@ class Circle {
   }
 
   /// Creates a new [Circle] object whose values are the same as this instance.
+  @override
   Circle clone() => copyWith();
 
   /// Converts this object to something serializable in JSON.
-  dynamic toJson() {
-    final Map<String, dynamic> json = <String, dynamic>{};
+  @override
+  Object toJson() {
+    final Map<String, Object> json = <String, Object>{};
 
-    void addIfPresent(String fieldName, dynamic value) {
+    void addIfPresent(String fieldName, Object? value) {
       if (value != null) {
         json[fieldName] = value;
       }
@@ -148,18 +134,22 @@ class Circle {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    final Circle typedOther = other;
-    return circleId == typedOther.circleId &&
-        consumeTapEvents == typedOther.consumeTapEvents &&
-        fillColor == typedOther.fillColor &&
-        center == typedOther.center &&
-        radius == typedOther.radius &&
-        strokeColor == typedOther.strokeColor &&
-        strokeWidth == typedOther.strokeWidth &&
-        visible == typedOther.visible &&
-        zIndex == typedOther.zIndex;
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is Circle &&
+        circleId == other.circleId &&
+        consumeTapEvents == other.consumeTapEvents &&
+        fillColor == other.fillColor &&
+        center == other.center &&
+        radius == other.radius &&
+        strokeColor == other.strokeColor &&
+        strokeWidth == other.strokeWidth &&
+        visible == other.visible &&
+        zIndex == other.zIndex;
   }
 
   @override

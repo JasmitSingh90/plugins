@@ -1,3 +1,36 @@
+## NEXT
+
+* Updates code for `no_leading_underscores_for_local_identifiers` lint.
+* Updates minimum Flutter version to 2.10.
+
+## 2.0.4
+
+* Removes unnecessary imports.
+* Fixes library_private_types_in_public_api, sort_child_properties_last and use_key_in_widget_constructors
+  lint warnings.
+
+## 2.0.3
+
+* Switches to an in-package method channel implementation.
+* Fixes newly enabled analyzer options.
+
+## 2.0.2
+
+* Add native unit tests.
+* Updated installation instructions in README.
+
+## 2.0.1
+
+* Add `implements` to the pubspec.
+
+## 2.0.0
+
+* Migrate to null safety.
+
+## 0.0.1+12
+
+* Update Flutter SDK constraint.
+
 ## 0.0.1+11
 
 * Remove unused `test` dependency.

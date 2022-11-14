@@ -1,3 +1,166 @@
+## NEXT
+
+* Updates code for `no_leading_underscores_for_local_identifiers` lint.
+
+## 2.2.1
+
+* Updates imports for `prefer_relative_imports`.
+
+## 2.2.0
+
+* Deprecates `AndroidGoogleMapsFlutter.useAndroidViewSurface` in favor of
+  [setting the flag directly in the Android implementation](https://pub.dev/packages/google_maps_flutter_android#display-mode).
+* Updates minimum Flutter version to 2.10.
+
+## 2.1.12
+
+* Fixes violations of new analysis option use_named_constants.
+
+## 2.1.11
+
+* Fixes avoid_redundant_argument_values lint warnings and minor typos.
+* Moves Android and iOS implementations to federated packages.
+
+## 2.1.10
+
+* Avoids map shift when scrolling on iOS.
+
+## 2.1.9
+
+* Updates integration tests to use the new inspector interface.
+* Removes obsolete test-only method for accessing a map controller's method channel.
+* Ignores unnecessary import warnings in preparation for [upcoming Flutter changes](https://github.com/flutter/flutter/pull/106316).
+
+## 2.1.8
+
+* Switches to new platform interface versions of `buildView` and
+  `updateOptions`.
+* Ignores unnecessary import warnings in preparation for [upcoming Flutter changes](https://github.com/flutter/flutter/pull/104231).
+
+## 2.1.7
+
+* Objective-C code cleanup.
+
+## 2.1.6
+
+* Fixes issue in Flutter v3.0.0 where some updates to the map don't take effect on Android.
+* Fixes iOS native unit tests on M1 devices.
+* Minor fixes for new analysis options.
+
+## 2.1.5
+
+* Removes unnecessary imports.
+* Fixes library_private_types_in_public_api, sort_child_properties_last and use_key_in_widget_constructors
+  lint warnings.
+
+## 2.1.4
+
+* Updates Android Google maps sdk version to `18.0.2`.
+* Adds OS version support information to README.
+
+## 2.1.3
+
+* Fixes iOS crash on `EXC_BAD_ACCESS KERN_PROTECTION_FAILURE` if the map frame changes long after creation.
+
+## 2.1.2
+
+* Removes dependencies from `pubspec.yaml` that are only needed in `example/pubspec.yaml`
+* Updates Android compileSdkVersion to 31.
+* Internal code cleanup for stricter analysis options.
+
+## 2.1.1
+
+* Suppresses unchecked cast warning.
+
+## 2.1.0
+
+* Add iOS unit and UI integration test targets.
+* Provide access to Hybrid Composition on Android through the `GoogleMap` widget.
+
+## 2.0.11
+
+* Add additional marker drag events.
+
+## 2.0.10
+
+* Update minimum Flutter SDK to 2.5 and iOS deployment target to 9.0.
+
+## 2.0.9
+
+* Fix Android `NullPointerException` caused by the `GoogleMapController` being disposed before `GoogleMap` was ready.
+
+## 2.0.8
+
+* Mark iOS arm64 simulators as unsupported.
+
+## 2.0.7
+
+* Add iOS unit and UI integration test targets.
+* Exclude arm64 simulators in example app.
+* Remove references to the Android V1 embedding.
+
+## 2.0.6
+
+* Migrate maven repo from jcenter to mavenCentral.
+
+## 2.0.5
+
+* Google Maps requires at least Android SDK 20.
+
+## 2.0.4
+
+* Unpin iOS GoogleMaps pod dependency version.
+
+## 2.0.3
+
+* Fix incorrect typecast in TileOverlay example.
+* Fix english wording in instructions.
+
+## 2.0.2
+
+* Update flutter\_plugin\_android\_lifecycle dependency to 2.0.1 to fix an R8 issue
+  on some versions.
+
+## 2.0.1
+
+* Update platform\_plugin\_interface version requirement.
+
+## 2.0.0
+
+* Migrate to null-safety
+* BREAKING CHANGE: Passing an unknown map object ID (e.g., MarkerId) to a
+  method, it will throw an `UnknownMapObjectIDError`. Previously it would
+  either silently do nothing, or throw an error trying to call a function on
+  `null`, depneding on the method.
+
+## 1.2.0
+
+* Support custom tiles.
+
+## 1.1.1
+
+* Fix in example app to properly place polyline at initial camera position.
+
+## 1.1.0
+
+* Add support for holes in Polygons.
+
+## 1.0.10
+
+* Update the example app: remove the deprecated `RaisedButton` and `FlatButton` widgets.
+
+## 1.0.9
+
+* Fix outdated links across a number of markdown files ([#3276](https://github.com/flutter/plugins/pull/3276))
+
+## 1.0.8
+
+* Update Flutter SDK constraint.
+
+## 1.0.7
+
+* Android: Handle deprecation & unchecked warning as error.
+
 ## 1.0.6
 
 * Update Dart SDK constraint in example.
@@ -111,7 +274,7 @@ GoogleMapController is now uniformly driven by implementing `DefaultLifecycleObs
 
 ## 0.5.26+1
 
-* Removes a errorneously added method from the GoogleMapController.h header file.
+* Removes an erroneously added method from the GoogleMapController.h header file.
 
 ## 0.5.26
 

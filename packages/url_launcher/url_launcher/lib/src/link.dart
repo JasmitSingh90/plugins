@@ -1,13 +1,21 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+
+import 'types.dart';
+import 'url_launcher_uri.dart';
+
+/// The function used to push routes to the Flutter framework.
+@visibleForTesting
+Future<ByteData> Function(Object?, String) pushRouteToFrameworkFunction =
+    pushRouteNameToFramework;
 
 /// A widget that renders a real link on the web, and uses WebViews in native
 /// platforms to open links.
@@ -17,7 +25,7 @@ import 'package:url_launcher_platform_interface/url_launcher_platform_interface.
 /// ```dart
 /// Link(
 ///   uri: Uri.parse('https://flutter.dev'),
-///   builder: (BuildContext context, FollowLink followLink) => RaisedButton(
+///   builder: (BuildContext context, FollowLink followLink) => ElevatedButton(
 ///     onPressed: followLink,
 ///     // ... other properties here ...
 ///   )},
@@ -29,34 +37,37 @@ import 'package:url_launcher_platform_interface/url_launcher_platform_interface.
 /// ```dart
 /// Link(
 ///   uri: Uri.parse('/home'),
-///   builder: (BuildContext context, FollowLink followLink) => RaisedButton(
+///   builder: (BuildContext context, FollowLink followLink) => ElevatedButton(
 ///     onPressed: followLink,
 ///     // ... other properties here ...
 ///   )},
 /// );
 /// ```
 class Link extends StatelessWidget implements LinkInfo {
+  /// Creates a widget that renders a real link on the web, and uses WebViews in
+  /// native platforms to open links.
+  const Link({
+    Key? key,
+    required this.uri,
+    this.target = LinkTarget.defaultTarget,
+    required this.builder,
+  }) : super(key: key);
+
   /// Called at build time to construct the widget tree under the link.
+  @override
   final LinkWidgetBuilder builder;
 
   /// The destination that this link leads to.
-  final Uri uri;
+  @override
+  final Uri? uri;
 
   /// The target indicating where to open the link.
+  @override
   final LinkTarget target;
 
   /// Whether the link is disabled or not.
+  @override
   bool get isDisabled => uri == null;
-
-  /// Creates a widget that renders a real link on the web, and uses WebViews in
-  /// native platforms to open links.
-  Link({
-    Key key,
-    @required this.uri,
-    LinkTarget target,
-    @required this.builder,
-  })  : target = target ?? LinkTarget.defaultTarget,
-        super(key: key);
 
   LinkDelegate get _effectiveDelegate {
     return UrlLauncherPlatform.instance.linkDelegate ??
@@ -75,7 +86,7 @@ class Link extends StatelessWidget implements LinkInfo {
 /// event channel messages to instruct the framework to push the route name.
 class DefaultLinkDelegate extends StatelessWidget {
   /// Creates a delegate for the given [link].
-  const DefaultLinkDelegate(this.link);
+  const DefaultLinkDelegate(this.link, {Key? key}) : super(key: key);
 
   /// Given a [link], creates an instance of [DefaultLinkDelegate].
   ///
@@ -88,38 +99,43 @@ class DefaultLinkDelegate extends StatelessWidget {
   final LinkInfo link;
 
   bool get _useWebView {
-    if (link.target == LinkTarget.self) return true;
-    if (link.target == LinkTarget.blank) return false;
-    return null;
+    if (link.target == LinkTarget.self) {
+      return true;
+    }
+    if (link.target == LinkTarget.blank) {
+      return false;
+    }
+    return false;
   }
 
   Future<void> _followLink(BuildContext context) async {
-    if (!link.uri.hasScheme) {
+    final Uri url = link.uri!;
+    if (!url.hasScheme) {
       // A uri that doesn't have a scheme is an internal route name. In this
       // case, we push it via Flutter's navigation system instead of letting the
       // browser handle it.
       final String routeName = link.uri.toString();
-      return pushRouteNameToFramework(context, routeName);
+      await pushRouteToFrameworkFunction(context, routeName);
+      return;
     }
 
-    // At this point, we know that the link is external. So we use the `launch`
-    // API to open the link.
-    final String urlString = link.uri.toString();
-    if (await canLaunch(urlString)) {
-      await launch(
-        urlString,
-        forceSafariVC: _useWebView,
-        forceWebView: _useWebView,
+    // At this point, we know that the link is external. So we use the
+    // `launchUrl` API to open the link.
+    if (await canLaunchUrl(url)) {
+      await launchUrl(
+        url,
+        mode: _useWebView
+            ? LaunchMode.inAppWebView
+            : LaunchMode.externalApplication,
       );
     } else {
       FlutterError.reportError(FlutterErrorDetails(
-        exception: 'Could not launch link $urlString',
+        exception: 'Could not launch link $url',
         stack: StackTrace.current,
         library: 'url_launcher',
         context: ErrorDescription('during launching a link'),
       ));
     }
-    return Future<void>.value(null);
   }
 
   @override

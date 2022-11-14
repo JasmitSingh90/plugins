@@ -1,3 +1,34 @@
+## NEXT
+
+* Updates minimum Flutter version to 2.10.
+
+## 2.0.4
+
+* Fixes library_private_types_in_public_api, sort_child_properties_last and use_key_in_widget_constructors
+  lint warnings.
+
+## 2.0.3
+
+* Fixes newly enabled analyzer options.
+* Removes dependency on `meta`.
+
+## 2.0.2
+
+* Add `implements` to pubspec.
+
+## 2.0.1
+
+* Updated installation instructions in README.
+* Move tests to `example` directory, so they run as integration_tests with `flutter drive`.
+
+## 2.0.0
+
+* Migrate to null-safety.
+
+## 0.1.2+8
+
+* Update Flutter SDK constraint.
+
 ## 0.1.2+7
 
 * Removed Android folder from `shared_preferences_web`.

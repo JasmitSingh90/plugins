@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,7 +8,7 @@ import Foundation
 public class SharedPreferencesPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(
-      name: "plugins.flutter.io/shared_preferences",
+      name: "plugins.flutter.io/shared_preferences_macos",
       binaryMessenger: registrar.messenger)
     let instance = SharedPreferencesPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)

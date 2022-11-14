@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,13 +7,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'page.dart';
 
+const LatLng _center = LatLng(32.080664, 34.9563837);
+
 class ScrollingMapPage extends GoogleMapExampleAppPage {
-  ScrollingMapPage() : super(const Icon(Icons.map), 'Scrolling map');
+  const ScrollingMapPage({Key? key})
+      : super(const Icon(Icons.map), 'Scrolling map', key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +24,7 @@ class ScrollingMapPage extends GoogleMapExampleAppPage {
 }
 
 class ScrollingMapBody extends StatelessWidget {
-  const ScrollingMapBody();
-
-  final LatLng center = const LatLng(32.080664, 34.9563837);
+  const ScrollingMapBody({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -44,19 +44,16 @@ class ScrollingMapBody extends StatelessWidget {
                     width: 300.0,
                     height: 300.0,
                     child: GoogleMap(
-                      initialCameraPosition: CameraPosition(
-                        target: center,
+                      initialCameraPosition: const CameraPosition(
+                        target: _center,
                         zoom: 11.0,
                       ),
-                      gestureRecognizers:
-                          // TODO(iskakaushik): Remove this when collection literals makes it to stable.
-                          // https://github.com/flutter/flutter/issues/28312
-                          // ignore: prefer_collection_literals
-                          <Factory<OneSequenceGestureRecognizer>>[
+                      gestureRecognizers: //
+                          <Factory<OneSequenceGestureRecognizer>>{
                         Factory<OneSequenceGestureRecognizer>(
                           () => EagerGestureRecognizer(),
                         ),
-                      ].toSet(),
+                      },
                     ),
                   ),
                 ),
@@ -69,7 +66,7 @@ class ScrollingMapBody extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 30.0),
             child: Column(
               children: <Widget>[
-                const Text('This map doesn\'t consume the vertical drags.'),
+                const Text("This map doesn't consume the vertical drags."),
                 const Padding(
                   padding: EdgeInsets.only(bottom: 12.0),
                   child:
@@ -80,38 +77,29 @@ class ScrollingMapBody extends StatelessWidget {
                     width: 300.0,
                     height: 300.0,
                     child: GoogleMap(
-                      initialCameraPosition: CameraPosition(
-                        target: center,
+                      initialCameraPosition: const CameraPosition(
+                        target: _center,
                         zoom: 11.0,
                       ),
-                      markers:
-                          // TODO(iskakaushik): Remove this when collection literals makes it to stable.
-                          // https://github.com/flutter/flutter/issues/28312
-                          // ignore: prefer_collection_literals
-                          Set<Marker>.of(
-                        <Marker>[
-                          Marker(
-                            markerId: MarkerId("test_marker_id"),
-                            position: LatLng(
-                              center.latitude,
-                              center.longitude,
-                            ),
-                            infoWindow: const InfoWindow(
-                              title: 'An interesting location',
-                              snippet: '*',
-                            ),
-                          )
-                        ],
-                      ),
-                      gestureRecognizers:
-                          // TODO(iskakaushik): Remove this when collection literals makes it to stable.
-                          // https://github.com/flutter/flutter/issues/28312
-                          // ignore: prefer_collection_literals
-                          <Factory<OneSequenceGestureRecognizer>>[
+                      markers: <Marker>{
+                        Marker(
+                          markerId: const MarkerId('test_marker_id'),
+                          position: LatLng(
+                            _center.latitude,
+                            _center.longitude,
+                          ),
+                          infoWindow: const InfoWindow(
+                            title: 'An interesting location',
+                            snippet: '*',
+                          ),
+                        ),
+                      },
+                      gestureRecognizers: <
+                          Factory<OneSequenceGestureRecognizer>>{
                         Factory<OneSequenceGestureRecognizer>(
                           () => ScaleGestureRecognizer(),
                         ),
-                      ].toSet(),
+                      },
                     ),
                   ),
                 ),

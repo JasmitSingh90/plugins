@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,7 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-
+import 'package:flutter_web_plugins/flutter_web_plugins.dart' show urlStrategy;
 import 'package:url_launcher_platform_interface/link.dart';
 
 /// The unique identifier for the view type to be used for link platform views.
@@ -31,7 +31,7 @@ HtmlViewFactory get linkViewFactory => LinkViewController._viewFactory;
 /// It uses a platform view to render an anchor element in the DOM.
 class WebLinkDelegate extends StatefulWidget {
   /// Creates a delegate for the given [link].
-  const WebLinkDelegate(this.link);
+  const WebLinkDelegate(this.link, {Key? key}) : super(key: key);
 
   /// Information about the link built by the app.
   final LinkInfo link;
@@ -45,16 +45,16 @@ class WebLinkDelegate extends StatefulWidget {
 /// For external URIs, it lets the browser do its thing. For app route names, it
 /// pushes the route name to the framework.
 class WebLinkDelegateState extends State<WebLinkDelegate> {
-  LinkViewController _controller;
+  late LinkViewController _controller;
 
   @override
   void didUpdateWidget(WebLinkDelegate oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.link.uri != oldWidget.link.uri) {
-      _controller?.setUri(widget.link.uri);
+      _controller.setUri(widget.link.uri);
     }
     if (widget.link.target != oldWidget.link.target) {
-      _controller?.setTarget(widget.link.target);
+      _controller.setTarget(widget.link.target);
     }
   }
 
@@ -66,6 +66,7 @@ class WebLinkDelegateState extends State<WebLinkDelegate> {
   @override
   Widget build(BuildContext context) {
     return Stack(
+      fit: StackFit.passthrough,
       children: <Widget>[
         widget.link.builder(
           context,
@@ -75,7 +76,7 @@ class WebLinkDelegateState extends State<WebLinkDelegate> {
           child: PlatformViewLink(
             viewType: linkViewType,
             onCreatePlatformView: (PlatformViewCreationParams params) {
-              _controller = LinkViewController.fromParams(params, context);
+              _controller = LinkViewController.fromParams(params);
               return _controller
                 ..setUri(widget.link.uri)
                 ..setTarget(widget.link.target);
@@ -84,8 +85,8 @@ class WebLinkDelegateState extends State<WebLinkDelegate> {
                 (BuildContext context, PlatformViewController controller) {
               return PlatformViewSurface(
                 controller: controller,
-                gestureRecognizers:
-                    Set<Factory<OneSequenceGestureRecognizer>>(),
+                gestureRecognizers: const <
+                    Factory<OneSequenceGestureRecognizer>>{},
                 hitTestBehavior: PlatformViewHitTestBehavior.transparent,
               );
             },
@@ -99,7 +100,7 @@ class WebLinkDelegateState extends State<WebLinkDelegate> {
 /// Controls link views.
 class LinkViewController extends PlatformViewController {
   /// Creates a [LinkViewController] instance with the unique [viewId].
-  LinkViewController(this.viewId, this.context) {
+  LinkViewController(this.viewId) {
     if (_instances.isEmpty) {
       // This is the first controller being created, attach the global click
       // listener.
@@ -112,28 +113,34 @@ class LinkViewController extends PlatformViewController {
   /// platform view [params].
   factory LinkViewController.fromParams(
     PlatformViewCreationParams params,
-    BuildContext context,
   ) {
     final int viewId = params.id;
-    final LinkViewController controller = LinkViewController(viewId, context);
+    final LinkViewController controller = LinkViewController(viewId);
     controller._initialize().then((_) {
-      params.onPlatformViewCreated(viewId);
+      /// Because _initialize is async, it can happen that [LinkViewController.dispose]
+      /// may get called before this `then` callback.
+      /// Check that the `controller` that was created by this factory is not
+      /// disposed before calling `onPlatformViewCreated`.
+      if (_instances[viewId] == controller) {
+        params.onPlatformViewCreated(viewId);
+      }
     });
     return controller;
   }
 
-  static Map<int, LinkViewController> _instances = <int, LinkViewController>{};
+  static final Map<int, LinkViewController> _instances =
+      <int, LinkViewController>{};
 
   static html.Element _viewFactory(int viewId) {
-    return _instances[viewId]?._element;
+    return _instances[viewId]!._element;
   }
 
-  static int _hitTestedViewId;
+  static int? _hitTestedViewId;
 
-  static StreamSubscription _clickSubscription;
+  static late StreamSubscription<html.MouseEvent> _clickSubscription;
 
   static void _onGlobalClick(html.MouseEvent event) {
-    final int viewId = getViewIdFromTarget(event);
+    final int? viewId = getViewIdFromTarget(event);
     _instances[viewId]?._onDomClick(event);
     // After the DOM click event has been received, clean up the hit test state
     // so we can start fresh on the next click.
@@ -157,10 +164,8 @@ class LinkViewController extends PlatformViewController {
   @override
   final int viewId;
 
-  /// The context of the [Link] widget that created this controller.
-  final BuildContext context;
+  late html.Element _element;
 
-  html.Element _element;
   bool get _isInitialized => _element != null;
 
   Future<void> _initialize() async {
@@ -169,6 +174,8 @@ class LinkViewController extends PlatformViewController {
     _element.style
       ..opacity = '0'
       ..display = 'block'
+      ..width = '100%'
+      ..height = '100%'
       ..cursor = 'unset';
 
     // This is recommended on MDN:
@@ -192,7 +199,7 @@ class LinkViewController extends PlatformViewController {
       return;
     }
 
-    if (_uri.hasScheme) {
+    if (_uri != null && _uri!.hasScheme) {
       // External links will be handled by the browser, so we don't have to do
       // anything.
       return;
@@ -203,19 +210,27 @@ class LinkViewController extends PlatformViewController {
     // browser handle it.
     event.preventDefault();
     final String routeName = _uri.toString();
-    pushRouteNameToFramework(context, routeName);
+    pushRouteNameToFramework(null, routeName);
   }
 
-  Uri _uri;
+  Uri? _uri;
 
   /// Set the [Uri] value for this link.
-  void setUri(Uri uri) {
+  ///
+  /// When Uri is null, the `href` attribute of the link is removed.
+  void setUri(Uri? uri) {
     assert(_isInitialized);
     _uri = uri;
     if (uri == null) {
       _element.removeAttribute('href');
     } else {
-      _element.setAttribute('href', uri.toString());
+      String href = uri.toString();
+      // in case an internal uri is given, the url mus be properly encoded
+      // using the currently used [UrlStrategy]
+      if (!uri.hasScheme) {
+        href = urlStrategy?.prepareExternalUrl(href) ?? href;
+      }
+      _element.setAttribute('href', href);
     }
   }
 
@@ -263,9 +278,13 @@ class LinkViewController extends PlatformViewController {
 }
 
 /// Finds the view id of the DOM element targeted by the [event].
-int getViewIdFromTarget(html.Event event) {
-  final html.Element linkElement = getLinkElementFromTarget(event);
+int? getViewIdFromTarget(html.Event event) {
+  final html.Element? linkElement = getLinkElementFromTarget(event);
   if (linkElement != null) {
+    // TODO(stuartmorgan): Remove this ignore (and change to getProperty<int>)
+    // once the templated version is available on stable. On master (2.8) this
+    // is already not necessary.
+    // ignore: return_of_invalid_type
     return getProperty(linkElement, linkViewIdProperty);
   }
   return null;
@@ -274,15 +293,17 @@ int getViewIdFromTarget(html.Event event) {
 /// Finds the targeted DOM element by the [event].
 ///
 /// It handles the case where the target element is inside a shadow DOM too.
-html.Element getLinkElementFromTarget(html.Event event) {
-  final html.Element target = event.target;
-  if (isLinkElement(target)) {
-    return target;
-  }
-  if (target.shadowRoot != null) {
-    final html.Element child = target.shadowRoot.lastChild;
-    if (isLinkElement(child)) {
-      return child;
+html.Element? getLinkElementFromTarget(html.Event event) {
+  final html.EventTarget? target = event.target;
+  if (target != null && target is html.Element) {
+    if (isLinkElement(target)) {
+      return target;
+    }
+    if (target.shadowRoot != null) {
+      final html.Node? child = target.shadowRoot!.lastChild;
+      if (child != null && child is html.Element && isLinkElement(child)) {
+        return child;
+      }
     }
   }
   return null;
@@ -290,6 +311,8 @@ html.Element getLinkElementFromTarget(html.Event event) {
 
 /// Checks if the given [element] is a link that was created by
 /// [LinkViewController].
-bool isLinkElement(html.Element element) {
-  return element.tagName == 'A' && hasProperty(element, linkViewIdProperty);
+bool isLinkElement(html.Element? element) {
+  return element != null &&
+      element.tagName == 'A' &&
+      hasProperty(element, linkViewIdProperty);
 }

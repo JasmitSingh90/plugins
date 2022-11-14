@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -15,7 +15,7 @@ import java.util.Objects;
 
 /**
  * Represents a response of a <a
- * href="https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getvm">getVM()</a>
+ * href="https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#getvm">getVM()</a>
  * request.
  */
 public class GetVmResponse {

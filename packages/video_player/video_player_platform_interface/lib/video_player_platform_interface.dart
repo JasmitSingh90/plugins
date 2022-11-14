@@ -1,15 +1,10 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:meta/meta.dart' show required, visibleForTesting;
-
-import 'method_channel_video_player.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 /// The interface that implementations of video_player must implement.
 ///
@@ -18,37 +13,25 @@ import 'method_channel_video_player.dart';
 /// (using `extends`) ensures that the subclass will get the default implementation, while
 /// platform implementations that `implements` this interface will be broken by newly added
 /// [VideoPlayerPlatform] methods.
-abstract class VideoPlayerPlatform {
-  /// Only mock implementations should set this to true.
-  ///
-  /// Mockito mocks are implementing this class with `implements` which is forbidden for anything
-  /// other than mocks (see class docs). This property provides a backdoor for mockito mocks to
-  /// skip the verification that the class isn't implemented with `implements`.
-  @visibleForTesting
-  bool get isMock => false;
+abstract class VideoPlayerPlatform extends PlatformInterface {
+  /// Constructs a VideoPlayerPlatform.
+  VideoPlayerPlatform() : super(token: _token);
 
-  static VideoPlayerPlatform _instance = MethodChannelVideoPlayer();
+  static final Object _token = Object();
 
-  /// The default instance of [VideoPlayerPlatform] to use.
+  static VideoPlayerPlatform _instance = _PlaceholderImplementation();
+
+  /// The instance of [VideoPlayerPlatform] to use.
   ///
+  /// Defaults to a placeholder that does not override any methods, and thus
+  /// throws `UnimplementedError` in most cases.
+  static VideoPlayerPlatform get instance => _instance;
+
   /// Platform-specific plugins should override this with their own
   /// platform-specific class that extends [VideoPlayerPlatform] when they
   /// register themselves.
-  ///
-  /// Defaults to [MethodChannelVideoPlayer].
-  static VideoPlayerPlatform get instance => _instance;
-
-  // TODO(amirh): Extract common platform interface logic.
-  // https://github.com/flutter/flutter/issues/43368
   static set instance(VideoPlayerPlatform instance) {
-    if (!instance.isMock) {
-      try {
-        instance._verifyProvidesDefaultImplementations();
-      } on NoSuchMethodError catch (_) {
-        throw AssertionError(
-            'Platform interfaces must not be implemented with `implements`');
-      }
-    }
+    PlatformInterface.verify(instance, _token);
     _instance = instance;
   }
 
@@ -66,8 +49,7 @@ abstract class VideoPlayerPlatform {
   }
 
   /// Creates an instance of a video player and returns its textureId.
-  Future<int> create(
-      DataSource dataSource, bool isDefaultAudioConfigurationEnabled) {
+  Future<int?> create(DataSource dataSource) {
     throw UnimplementedError('create() has not been implemented.');
   }
 
@@ -120,15 +102,9 @@ abstract class VideoPlayerPlatform {
   Future<void> setMixWithOthers(bool mixWithOthers) {
     throw UnimplementedError('setMixWithOthers() has not been implemented.');
   }
-
-  // This method makes sure that VideoPlayer isn't implemented with `implements`.
-  //
-  // See class doc for more details on why implementing this class is forbidden.
-  //
-  // This private method is called by the instance setter, which fails if the class is
-  // implemented with `implements`.
-  void _verifyProvidesDefaultImplementations() {}
 }
+
+class _PlaceholderImplementation extends VideoPlayerPlatform {}
 
 /// Description of the data source used to create an instance of
 /// the video player.
@@ -147,11 +123,12 @@ class DataSource {
   /// The [package] argument must be non-null when the asset comes from a
   /// package and null otherwise.
   DataSource({
-    @required this.sourceType,
+    required this.sourceType,
     this.uri,
     this.formatHint,
     this.asset,
     this.package,
+    this.httpHeaders = const <String, String>{},
   });
 
   /// The way in which the video was originally loaded.
@@ -164,18 +141,23 @@ class DataSource {
   ///
   /// This will be in different formats depending on the [DataSourceType] of
   /// the original video.
-  final String uri;
+  final String? uri;
 
   /// **Android only**. Will override the platform's generic file format
   /// detection with whatever is set here.
-  final VideoFormat formatHint;
+  final VideoFormat? formatHint;
+
+  /// HTTP headers used for the request to the [uri].
+  /// Only for [DataSourceType.network] videos.
+  /// Always empty for other video types.
+  Map<String, String> httpHeaders;
 
   /// The name of the asset. Only set for [DataSourceType.asset] videos.
-  final String asset;
+  final String? asset;
 
   /// The package that the asset was loaded from. Only set for
   /// [DataSourceType.asset] videos.
-  final String package;
+  final String? package;
 }
 
 /// The way in which the video was originally loaded.
@@ -191,6 +173,9 @@ enum DataSourceType {
 
   /// The video was loaded off of the local filesystem.
   file,
+
+  /// The video is available via contentUri. Android only.
+  contentUri,
 }
 
 /// The file format of the given video.
@@ -209,17 +194,23 @@ enum VideoFormat {
 }
 
 /// Event emitted from the platform implementation.
+@immutable
 class VideoEvent {
   /// Creates an instance of [VideoEvent].
   ///
   /// The [eventType] argument is required.
   ///
-  /// Depending on the [eventType], the [duration], [size] and [buffered]
-  /// arguments can be null.
+  /// Depending on the [eventType], the [duration], [size],
+  /// [rotationCorrection], and [buffered] arguments can be null.
+  // TODO(stuartmorgan): Temporarily suppress warnings about not using const
+  // in all of the other video player packages, fix this, and then update
+  // the other packages to use const.
+  // ignore: prefer_const_constructors_in_immutables
   VideoEvent({
-    @required this.eventType,
+    required this.eventType,
     this.duration,
     this.size,
+    this.rotationCorrection,
     this.buffered,
   });
 
@@ -229,17 +220,22 @@ class VideoEvent {
   /// Duration of the video.
   ///
   /// Only used if [eventType] is [VideoEventType.initialized].
-  final Duration duration;
+  final Duration? duration;
 
   /// Size of the video.
   ///
   /// Only used if [eventType] is [VideoEventType.initialized].
-  final Size size;
+  final Size? size;
+
+  /// Degrees to rotate the video (clockwise) so it is displayed correctly.
+  ///
+  /// Only used if [eventType] is [VideoEventType.initialized].
+  final int? rotationCorrection;
 
   /// Buffered parts of the video.
   ///
   /// Only used if [eventType] is [VideoEventType.bufferingUpdate].
-  final List<DurationRange> buffered;
+  final List<DurationRange>? buffered;
 
   @override
   bool operator ==(Object other) {
@@ -249,15 +245,18 @@ class VideoEvent {
             eventType == other.eventType &&
             duration == other.duration &&
             size == other.size &&
+            rotationCorrection == other.rotationCorrection &&
             listEquals(buffered, other.buffered);
   }
 
   @override
-  int get hashCode =>
-      eventType.hashCode ^
-      duration.hashCode ^
-      size.hashCode ^
-      buffered.hashCode;
+  int get hashCode => Object.hash(
+        eventType,
+        duration,
+        size,
+        rotationCorrection,
+        buffered,
+      );
 }
 
 /// Type of the event.
@@ -286,9 +285,14 @@ enum VideoEventType {
 
 /// Describes a discrete segment of time within a video using a [start] and
 /// [end] [Duration].
+@immutable
 class DurationRange {
   /// Trusts that the given [start] and [end] are actually in order. They should
   /// both be non-null.
+  // TODO(stuartmorgan): Temporarily suppress warnings about not using const
+  // in all of the other video player packages, fix this, and then update
+  // the other packages to use const.
+  // ignore: prefer_const_constructors_in_immutables
   DurationRange(this.start, this.end);
 
   /// The beginning of the segment described relative to the beginning of the
@@ -329,7 +333,8 @@ class DurationRange {
   }
 
   @override
-  String toString() => '$runtimeType(start: $start, end: $end)';
+  String toString() =>
+      '${objectRuntimeType(this, 'DurationRange')}(start: $start, end: $end)';
 
   @override
   bool operator ==(Object other) =>
@@ -340,15 +345,30 @@ class DurationRange {
           end == other.end;
 
   @override
-  int get hashCode => start.hashCode ^ end.hashCode;
+  int get hashCode => Object.hash(start, end);
 }
 
 /// [VideoPlayerOptions] can be optionally used to set additional player settings
+@immutable
 class VideoPlayerOptions {
+  /// set additional optional player settings
+  // TODO(stuartmorgan): Temporarily suppress warnings about not using const
+  // in all of the other video player packages, fix this, and then update
+  // the other packages to use const.
+  // ignore: prefer_const_constructors_in_immutables
+  VideoPlayerOptions({
+    this.mixWithOthers = false,
+    this.allowBackgroundPlayback = false,
+  });
+
+  /// Set this to true to keep playing video in background, when app goes in background.
+  /// The default value is false.
+  final bool allowBackgroundPlayback;
+
   /// Set this to true to mix the video players audio with other audio sources.
   /// The default value is false
+  ///
+  /// Note: This option will be silently ignored in the web platform (there is
+  /// currently no way to implement this feature in this platform).
   final bool mixWithOthers;
-
-  /// set additional optional player settings
-  VideoPlayerOptions({this.mixWithOthers = false});
 }

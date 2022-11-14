@@ -1,29 +1,29 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 // ignore_for_file: public_member_api_docs
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:path_provider_windows/path_provider_windows.dart';
 
-void main() async {
-  runApp(MyApp());
+void main() {
+  runApp(const MyApp());
 }
 
 /// Sample app
 class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
-  _MyAppState createState() => _MyAppState();
+  State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  String _tempDirectory = 'Unknown';
-  String _downloadsDirectory = 'Unknown';
-  String _appSupportDirectory = 'Unknown';
-  String _documentsDirectory = 'Unknown';
+  String? _tempDirectory = 'Unknown';
+  String? _downloadsDirectory = 'Unknown';
+  String? _appSupportDirectory = 'Unknown';
+  String? _documentsDirectory = 'Unknown';
 
   @override
   void initState() {
@@ -33,10 +33,10 @@ class _MyAppState extends State<MyApp> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initDirectories() async {
-    String tempDirectory;
-    String downloadsDirectory;
-    String appSupportDirectory;
-    String documentsDirectory;
+    String? tempDirectory;
+    String? downloadsDirectory;
+    String? appSupportDirectory;
+    String? documentsDirectory;
     final PathProviderWindows provider = PathProviderWindows();
 
     try {
@@ -79,7 +79,7 @@ class _MyAppState extends State<MyApp> {
         ),
         body: Center(
           child: Column(
-            children: [
+            children: <Widget>[
               Text('Temp Directory: $_tempDirectory\n'),
               Text('Documents Directory: $_documentsDirectory\n'),
               Text('Downloads Directory: $_downloadsDirectory\n'),

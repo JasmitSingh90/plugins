@@ -1,19 +1,21 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
+// TODO(a14n): remove this import once Flutter 3.1 or later reaches stable (including flutter/flutter#104231)
+// ignore: unnecessary_import
 import 'dart:typed_data';
 
-import 'package:flutter/widgets.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-
-import 'package:google_maps_flutter_platform_interface/src/method_channel/method_channel_google_maps_flutter.dart';
-import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+
+import '../../google_maps_flutter_platform_interface.dart';
+import '../types/utils/map_configuration_serialization.dart';
 
 /// The interface that platform-specific implementations of `google_maps_flutter` must extend.
 ///
@@ -39,7 +41,7 @@ abstract class GoogleMapsFlutterPlatform extends PlatformInterface {
   /// Platform-specific plugins should set this with their own platform-specific
   /// class that extends [GoogleMapsFlutterPlatform] when they register themselves.
   static set instance(GoogleMapsFlutterPlatform instance) {
-    PlatformInterface.verifyToken(instance, _token);
+    PlatformInterface.verify(instance, _token);
     _instance = instance;
   }
 
@@ -50,7 +52,8 @@ abstract class GoogleMapsFlutterPlatform extends PlatformInterface {
     throw UnimplementedError('init() has not been implemented.');
   }
 
-  /// Updates configuration options of the map user interface.
+  /// Updates configuration options of the map user interface - deprecated, use
+  /// updateMapConfiguration instead.
   ///
   /// Change listeners are notified once the update has been made on the
   /// platform side.
@@ -58,9 +61,23 @@ abstract class GoogleMapsFlutterPlatform extends PlatformInterface {
   /// The returned [Future] completes after listeners have been notified.
   Future<void> updateMapOptions(
     Map<String, dynamic> optionsUpdate, {
-    @required int mapId,
+    required int mapId,
   }) {
     throw UnimplementedError('updateMapOptions() has not been implemented.');
+  }
+
+  /// Updates configuration options of the map user interface.
+  ///
+  /// Change listeners are notified once the update has been made on the
+  /// platform side.
+  ///
+  /// The returned [Future] completes after listeners have been notified.
+  Future<void> updateMapConfiguration(
+    MapConfiguration configuration, {
+    required int mapId,
+  }) {
+    return updateMapOptions(jsonForMapConfiguration(configuration),
+        mapId: mapId);
   }
 
   /// Updates marker configuration.
@@ -71,7 +88,7 @@ abstract class GoogleMapsFlutterPlatform extends PlatformInterface {
   /// The returned [Future] completes after listeners have been notified.
   Future<void> updateMarkers(
     MarkerUpdates markerUpdates, {
-    @required int mapId,
+    required int mapId,
   }) {
     throw UnimplementedError('updateMarkers() has not been implemented.');
   }
@@ -84,7 +101,7 @@ abstract class GoogleMapsFlutterPlatform extends PlatformInterface {
   /// The returned [Future] completes after listeners have been notified.
   Future<void> updatePolygons(
     PolygonUpdates polygonUpdates, {
-    @required int mapId,
+    required int mapId,
   }) {
     throw UnimplementedError('updatePolygons() has not been implemented.');
   }
@@ -97,7 +114,7 @@ abstract class GoogleMapsFlutterPlatform extends PlatformInterface {
   /// The returned [Future] completes after listeners have been notified.
   Future<void> updatePolylines(
     PolylineUpdates polylineUpdates, {
-    @required int mapId,
+    required int mapId,
   }) {
     throw UnimplementedError('updatePolylines() has not been implemented.');
   }
@@ -110,9 +127,36 @@ abstract class GoogleMapsFlutterPlatform extends PlatformInterface {
   /// The returned [Future] completes after listeners have been notified.
   Future<void> updateCircles(
     CircleUpdates circleUpdates, {
-    @required int mapId,
+    required int mapId,
   }) {
     throw UnimplementedError('updateCircles() has not been implemented.');
+  }
+
+  /// Updates tile overlay configuration.
+  ///
+  /// Change listeners are notified once the update has been made on the
+  /// platform side.
+  ///
+  /// The returned [Future] completes after listeners have been notified.
+  Future<void> updateTileOverlays({
+    required Set<TileOverlay> newTileOverlays,
+    required int mapId,
+  }) {
+    throw UnimplementedError('updateTileOverlays() has not been implemented.');
+  }
+
+  /// Clears the tile cache so that all tiles will be requested again from the
+  /// [TileProvider].
+  ///
+  /// The current tiles from this tile overlay will also be
+  /// cleared from the map after calling this method. The Google Maps SDK maintains a small
+  /// in-memory cache of tiles. If you want to cache tiles for longer, you
+  /// should implement an on-disk cache.
+  Future<void> clearTileCache(
+    TileOverlayId tileOverlayId, {
+    required int mapId,
+  }) {
+    throw UnimplementedError('clearTileCache() has not been implemented.');
   }
 
   /// Starts an animated change of the map camera position.
@@ -121,7 +165,7 @@ abstract class GoogleMapsFlutterPlatform extends PlatformInterface {
   /// platform side.
   Future<void> animateCamera(
     CameraUpdate cameraUpdate, {
-    @required int mapId,
+    required int mapId,
   }) {
     throw UnimplementedError('animateCamera() has not been implemented.');
   }
@@ -132,7 +176,7 @@ abstract class GoogleMapsFlutterPlatform extends PlatformInterface {
   /// platform side.
   Future<void> moveCamera(
     CameraUpdate cameraUpdate, {
-    @required int mapId,
+    required int mapId,
   }) {
     throw UnimplementedError('moveCamera() has not been implemented.');
   }
@@ -148,15 +192,15 @@ abstract class GoogleMapsFlutterPlatform extends PlatformInterface {
   ///
   /// The style string can be generated using [map style tool](https://mapstyle.withgoogle.com/).
   Future<void> setMapStyle(
-    String mapStyle, {
-    @required int mapId,
+    String? mapStyle, {
+    required int mapId,
   }) {
     throw UnimplementedError('setMapStyle() has not been implemented.');
   }
 
   /// Return the region that is visible in a map.
   Future<LatLngBounds> getVisibleRegion({
-    @required int mapId,
+    required int mapId,
   }) {
     throw UnimplementedError('getVisibleRegion() has not been implemented.');
   }
@@ -168,7 +212,7 @@ abstract class GoogleMapsFlutterPlatform extends PlatformInterface {
   /// of the map, not necessarily of the whole screen.
   Future<ScreenCoordinate> getScreenCoordinate(
     LatLng latLng, {
-    @required int mapId,
+    required int mapId,
   }) {
     throw UnimplementedError('getScreenCoordinate() has not been implemented.');
   }
@@ -180,7 +224,7 @@ abstract class GoogleMapsFlutterPlatform extends PlatformInterface {
   /// of the map, not necessarily of the whole screen.
   Future<LatLng> getLatLng(
     ScreenCoordinate screenCoordinate, {
-    @required int mapId,
+    required int mapId,
   }) {
     throw UnimplementedError('getLatLng() has not been implemented.');
   }
@@ -195,7 +239,7 @@ abstract class GoogleMapsFlutterPlatform extends PlatformInterface {
   ///   * [isMarkerInfoWindowShown] to check if the Info Window is showing.
   Future<void> showMarkerInfoWindow(
     MarkerId markerId, {
-    @required int mapId,
+    required int mapId,
   }) {
     throw UnimplementedError(
         'showMarkerInfoWindow() has not been implemented.');
@@ -211,7 +255,7 @@ abstract class GoogleMapsFlutterPlatform extends PlatformInterface {
   ///   * [isMarkerInfoWindowShown] to check if the Info Window is showing.
   Future<void> hideMarkerInfoWindow(
     MarkerId markerId, {
-    @required int mapId,
+    required int mapId,
   }) {
     throw UnimplementedError(
         'hideMarkerInfoWindow() has not been implemented.');
@@ -227,21 +271,23 @@ abstract class GoogleMapsFlutterPlatform extends PlatformInterface {
   ///   * [hideMarkerInfoWindow] to hide the Info Window.
   Future<bool> isMarkerInfoWindowShown(
     MarkerId markerId, {
-    @required int mapId,
+    required int mapId,
   }) {
     throw UnimplementedError('updateMapOptions() has not been implemented.');
   }
 
-  /// Returns the current zoom level of the map
+  /// Returns the current zoom level of the map.
   Future<double> getZoomLevel({
-    @required int mapId,
+    required int mapId,
   }) {
     throw UnimplementedError('getZoomLevel() has not been implemented.');
   }
 
-  /// Returns the image bytes of the map
-  Future<Uint8List> takeSnapshot({
-    @required int mapId,
+  /// Returns the image bytes of the map.
+  ///
+  /// Returns null if a snapshot cannot be created.
+  Future<Uint8List?> takeSnapshot({
+    required int mapId,
   }) {
     throw UnimplementedError('takeSnapshot() has not been implemented.');
   }
@@ -250,70 +296,160 @@ abstract class GoogleMapsFlutterPlatform extends PlatformInterface {
   // into the plugin
 
   /// The Camera started moving.
-  Stream<CameraMoveStartedEvent> onCameraMoveStarted({@required int mapId}) {
+  Stream<CameraMoveStartedEvent> onCameraMoveStarted({required int mapId}) {
     throw UnimplementedError('onCameraMoveStarted() has not been implemented.');
   }
 
   /// The Camera finished moving to a new [CameraPosition].
-  Stream<CameraMoveEvent> onCameraMove({@required int mapId}) {
+  Stream<CameraMoveEvent> onCameraMove({required int mapId}) {
     throw UnimplementedError('onCameraMove() has not been implemented.');
   }
 
   /// The Camera is now idle.
-  Stream<CameraIdleEvent> onCameraIdle({@required int mapId}) {
+  Stream<CameraIdleEvent> onCameraIdle({required int mapId}) {
     throw UnimplementedError('onCameraMove() has not been implemented.');
   }
 
   /// A [Marker] has been tapped.
-  Stream<MarkerTapEvent> onMarkerTap({@required int mapId}) {
+  Stream<MarkerTapEvent> onMarkerTap({required int mapId}) {
     throw UnimplementedError('onMarkerTap() has not been implemented.');
   }
 
   /// An [InfoWindow] has been tapped.
-  Stream<InfoWindowTapEvent> onInfoWindowTap({@required int mapId}) {
+  Stream<InfoWindowTapEvent> onInfoWindowTap({required int mapId}) {
     throw UnimplementedError('onInfoWindowTap() has not been implemented.');
   }
 
   /// A [Marker] has been dragged to a different [LatLng] position.
-  Stream<MarkerDragEndEvent> onMarkerDragEnd({@required int mapId}) {
+  Stream<MarkerDragStartEvent> onMarkerDragStart({required int mapId}) {
+    throw UnimplementedError('onMarkerDragEnd() has not been implemented.');
+  }
+
+  /// A [Marker] has been dragged to a different [LatLng] position.
+  Stream<MarkerDragEvent> onMarkerDrag({required int mapId}) {
+    throw UnimplementedError('onMarkerDragEnd() has not been implemented.');
+  }
+
+  /// A [Marker] has been dragged to a different [LatLng] position.
+  Stream<MarkerDragEndEvent> onMarkerDragEnd({required int mapId}) {
     throw UnimplementedError('onMarkerDragEnd() has not been implemented.');
   }
 
   /// A [Polyline] has been tapped.
-  Stream<PolylineTapEvent> onPolylineTap({@required int mapId}) {
+  Stream<PolylineTapEvent> onPolylineTap({required int mapId}) {
     throw UnimplementedError('onPolylineTap() has not been implemented.');
   }
 
   /// A [Polygon] has been tapped.
-  Stream<PolygonTapEvent> onPolygonTap({@required int mapId}) {
+  Stream<PolygonTapEvent> onPolygonTap({required int mapId}) {
     throw UnimplementedError('onPolygonTap() has not been implemented.');
   }
 
   /// A [Circle] has been tapped.
-  Stream<CircleTapEvent> onCircleTap({@required int mapId}) {
+  Stream<CircleTapEvent> onCircleTap({required int mapId}) {
     throw UnimplementedError('onCircleTap() has not been implemented.');
   }
 
   /// A Map has been tapped at a certain [LatLng].
-  Stream<MapTapEvent> onTap({@required int mapId}) {
+  Stream<MapTapEvent> onTap({required int mapId}) {
     throw UnimplementedError('onTap() has not been implemented.');
   }
 
   /// A Map has been long-pressed at a certain [LatLng].
-  Stream<MapLongPressEvent> onLongPress({@required int mapId}) {
+  Stream<MapLongPressEvent> onLongPress({required int mapId}) {
     throw UnimplementedError('onLongPress() has not been implemented.');
   }
 
   /// Dispose of whatever resources the `mapId` is holding on to.
-  void dispose({@required int mapId}) {
+  void dispose({required int mapId}) {
     throw UnimplementedError('dispose() has not been implemented.');
   }
 
-  /// Returns a widget displaying the map view
+  /// Returns a widget displaying the map view - deprecated, use
+  /// [buildViewWithConfiguration] instead.
   Widget buildView(
-      Map<String, dynamic> creationParams,
-      Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
-      PlatformViewCreatedCallback onPlatformViewCreated) {
+    int creationId,
+    PlatformViewCreatedCallback onPlatformViewCreated, {
+    required CameraPosition initialCameraPosition,
+    Set<Marker> markers = const <Marker>{},
+    Set<Polygon> polygons = const <Polygon>{},
+    Set<Polyline> polylines = const <Polyline>{},
+    Set<Circle> circles = const <Circle>{},
+    Set<TileOverlay> tileOverlays = const <TileOverlay>{},
+    Set<Factory<OneSequenceGestureRecognizer>>? gestureRecognizers =
+        const <Factory<OneSequenceGestureRecognizer>>{},
+    // TODO(stuartmorgan): Replace with a structured type that's part of the
+    // interface. See https://github.com/flutter/flutter/issues/70330.
+    Map<String, dynamic> mapOptions = const <String, dynamic>{},
+  }) {
     throw UnimplementedError('buildView() has not been implemented.');
+  }
+
+  /// Returns a widget displaying the map view - deprecated, use
+  /// [buildViewWithConfiguration] instead.
+  ///
+  /// This method is similar to [buildView], but contains a parameter for
+  /// platforms that require a text direction.
+  ///
+  /// Default behavior passes all parameters except `textDirection` to
+  /// [buildView]. This is for backward compatibility with existing
+  /// implementations. Platforms that use the text direction should override
+  /// this as the primary implementation, and delegate to it from buildView.
+  Widget buildViewWithTextDirection(
+    int creationId,
+    PlatformViewCreatedCallback onPlatformViewCreated, {
+    required CameraPosition initialCameraPosition,
+    required TextDirection textDirection,
+    Set<Factory<OneSequenceGestureRecognizer>>? gestureRecognizers,
+    Set<Marker> markers = const <Marker>{},
+    Set<Polygon> polygons = const <Polygon>{},
+    Set<Polyline> polylines = const <Polyline>{},
+    Set<Circle> circles = const <Circle>{},
+    Set<TileOverlay> tileOverlays = const <TileOverlay>{},
+    Map<String, dynamic> mapOptions = const <String, dynamic>{},
+  }) {
+    return buildView(
+      creationId,
+      onPlatformViewCreated,
+      initialCameraPosition: initialCameraPosition,
+      markers: markers,
+      polygons: polygons,
+      polylines: polylines,
+      circles: circles,
+      tileOverlays: tileOverlays,
+      gestureRecognizers: gestureRecognizers,
+      mapOptions: mapOptions,
+    );
+  }
+
+  /// Returns a widget displaying the map view.
+  Widget buildViewWithConfiguration(
+    int creationId,
+    PlatformViewCreatedCallback onPlatformViewCreated, {
+    required MapWidgetConfiguration widgetConfiguration,
+    MapConfiguration mapConfiguration = const MapConfiguration(),
+    MapObjects mapObjects = const MapObjects(),
+  }) {
+    return buildViewWithTextDirection(
+      creationId,
+      onPlatformViewCreated,
+      initialCameraPosition: widgetConfiguration.initialCameraPosition,
+      textDirection: widgetConfiguration.textDirection,
+      markers: mapObjects.markers,
+      polygons: mapObjects.polygons,
+      polylines: mapObjects.polylines,
+      circles: mapObjects.circles,
+      tileOverlays: mapObjects.tileOverlays,
+      gestureRecognizers: widgetConfiguration.gestureRecognizers,
+      mapOptions: jsonForMapConfiguration(mapConfiguration),
+    );
+  }
+
+  /// Populates [GoogleMapsFlutterInspectorPlatform.instance] to allow
+  /// inspecting the platform map state.
+  @visibleForTesting
+  void enableDebugInspection() {
+    throw UnimplementedError(
+        'enableDebugInspection() has not been implemented.');
   }
 }

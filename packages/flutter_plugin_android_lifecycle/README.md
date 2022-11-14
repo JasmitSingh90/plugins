@@ -1,6 +1,6 @@
 # Flutter Android Lifecycle Plugin
 
-[![pub package](https://img.shields.io/pub/v/flutter_plugin_android_lifecycle.svg)](https://pub.dartlang.org/packages/flutter_plugin_android_lifecycle)
+[![pub package](https://img.shields.io/pub/v/flutter_plugin_android_lifecycle.svg)](https://pub.dev/packages/flutter_plugin_android_lifecycle)
 
 A Flutter plugin for Android to allow other Flutter plugins to access  Android `Lifecycle` objects
 in the plugin's binding.
@@ -9,9 +9,13 @@ The purpose of having this plugin instead of exposing an Android `Lifecycle` obj
 Android embedding plugins API is to force plugins to have a pub constraint that signifies the
 major version of the Android `Lifecycle` API they expect.
 
+|             | Android |
+|-------------|---------|
+| **Support** | SDK 16+ |
+
 ## Installation
 
-Add `flutter_plugin_android_lifecycle` as a [dependency in your pubspec.yaml file](https://flutter.io/using-packages/).
+Add `flutter_plugin_android_lifecycle` as a [dependency in your pubspec.yaml file](https://flutter.dev/using-packages/).
 
 ## Example
 
@@ -32,7 +36,7 @@ public class MyPlugin implements FlutterPlugin, ActivityAware {
     Lifecycle lifecycle = FlutterLifecycleAdapter.getActivityLifecycle(binding);
     // Use lifecycle as desired.
   }
-  
+
   //...
 }
 ```

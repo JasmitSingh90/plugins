@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,8 +7,8 @@ library gapi_onload;
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:js/js.dart';
-import 'package:meta/meta.dart';
 
 import 'generated/gapi.dart' as gapi;
 import 'utils.dart' show injectJSLibraries;
@@ -20,7 +20,7 @@ external set gapiOnloadCallback(Function callback);
 /// This is only exposed for testing. It shouldn't be accessed by users of the
 /// plugin as it could break at any point.
 @visibleForTesting
-const String kGapiOnloadCallbackFunctionName = "gapiOnloadCallback";
+const String kGapiOnloadCallbackFunctionName = 'gapiOnloadCallback';
 String _addOnloadToScript(String url) => url.startsWith('data:')
     ? url
     : '$url?onload=$kGapiOnloadCallbackFunctionName';
@@ -37,8 +37,10 @@ Future<void> inject(String url, {List<String> libraries = const <String>[]}) {
   });
 
   // Attach the onload callback to the main url
-  final List<String> allLibraries = <String>[_addOnloadToScript(url)]
-    ..addAll(libraries);
+  final List<String> allLibraries = <String>[
+    _addOnloadToScript(url),
+    ...libraries
+  ];
 
   return Future.wait(
       <Future<void>>[injectJSLibraries(allLibraries), gapiOnLoad.future]);

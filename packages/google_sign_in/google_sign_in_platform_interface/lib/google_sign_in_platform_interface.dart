@@ -1,9 +1,12 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:meta/meta.dart' show required, visibleForTesting;
+
+import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+
 import 'src/method_channel_google_sign_in.dart';
 import 'src/types.dart';
 
@@ -18,13 +21,19 @@ export 'src/types.dart';
 /// ensures that the subclass will get the default implementation, while
 /// platform implementations that `implements` this interface will be broken by
 /// newly added [GoogleSignInPlatform] methods.
-abstract class GoogleSignInPlatform {
+abstract class GoogleSignInPlatform extends PlatformInterface {
+  /// Constructs a GoogleSignInPlatform.
+  GoogleSignInPlatform() : super(token: _token);
+
+  static final Object _token = Object();
+
   /// Only mock implementations should set this to `true`.
   ///
   /// Mockito mocks implement this class with `implements` which is forbidden
   /// (see class docs). This property provides a backdoor for mocks to skip the
   /// verification that the class isn't implemented with `implements`.
   @visibleForTesting
+  @Deprecated('Use MockPlatformInterfaceMixin instead')
   bool get isMock => false;
 
   /// The default instance of [GoogleSignInPlatform] to use.
@@ -42,27 +51,12 @@ abstract class GoogleSignInPlatform {
   // https://github.com/flutter/flutter/issues/43368
   static set instance(GoogleSignInPlatform instance) {
     if (!instance.isMock) {
-      try {
-        instance._verifyProvidesDefaultImplementations();
-      } on NoSuchMethodError catch (_) {
-        throw AssertionError(
-            'Platform interfaces must not be implemented with `implements`');
-      }
+      PlatformInterface.verify(instance, _token);
     }
     _instance = instance;
   }
 
-  /// This method ensures that [GoogleSignInPlatform] isn't implemented with `implements`.
-  ///
-  /// See class docs for more details on why using `implements` to implement
-  /// [GoogleSignInPlatform] is forbidden.
-  ///
-  /// This private method is called by the [instance] setter, which should fail
-  /// if the provided instance is a class implemented with `implements`.
-  void _verifyProvidesDefaultImplementations() {}
-
-  /// Initializes the plugin. You must call this method before calling other
-  /// methods.
+  /// Initializes the plugin. Deprecated: call [initWithParams] instead.
   ///
   /// The [hostedDomain] argument specifies a hosted domain restriction. By
   /// setting this, sign in will be restricted to accounts of the user in the
@@ -78,27 +72,43 @@ abstract class GoogleSignInPlatform {
   ///
   /// See:
   /// https://developers.google.com/identity/sign-in/web/reference#gapiauth2initparams
-  Future<void> init(
-      {@required String hostedDomain,
-      List<String> scopes,
-      SignInOption signInOption,
-      String clientId}) async {
+  Future<void> init({
+    List<String> scopes = const <String>[],
+    SignInOption signInOption = SignInOption.standard,
+    String? hostedDomain,
+    String? clientId,
+  }) async {
     throw UnimplementedError('init() has not been implemented.');
   }
 
+  /// Initializes the plugin with specified [params]. You must call this method
+  /// before calling other methods.
+  ///
+  /// See:
+  ///
+  /// * [SignInInitParameters]
+  Future<void> initWithParams(SignInInitParameters params) async {
+    await init(
+      scopes: params.scopes,
+      signInOption: params.signInOption,
+      hostedDomain: params.hostedDomain,
+      clientId: params.clientId,
+    );
+  }
+
   /// Attempts to reuse pre-existing credentials to sign in again, without user interaction.
-  Future<GoogleSignInUserData> signInSilently() async {
+  Future<GoogleSignInUserData?> signInSilently() async {
     throw UnimplementedError('signInSilently() has not been implemented.');
   }
 
   /// Signs in the user with the options specified to [init].
-  Future<GoogleSignInUserData> signIn() async {
+  Future<GoogleSignInUserData?> signIn() async {
     throw UnimplementedError('signIn() has not been implemented.');
   }
 
   /// Returns the Tokens used to authenticate other API calls.
   Future<GoogleSignInTokenData> getTokens(
-      {@required String email, bool shouldRecoverAuth}) async {
+      {required String email, bool? shouldRecoverAuth}) async {
     throw UnimplementedError('getTokens() has not been implemented.');
   }
 
@@ -118,7 +128,7 @@ abstract class GoogleSignInPlatform {
   }
 
   /// Clears any cached information that the plugin may be holding on to.
-  Future<void> clearAuthCache({@required String token}) async {
+  Future<void> clearAuthCache({required String token}) async {
     throw UnimplementedError('clearAuthCache() has not been implemented.');
   }
 
