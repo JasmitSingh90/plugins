@@ -10,9 +10,15 @@ dependencies:
     sdk: flutter
   js: ^0.6.0
   video_player_platform_interface:
-    path: ../../video_player_platform_interface
+    git:
+      url: https://github.com/JasmitSingh90/plugins.git
+      ref: custom-video-player-v1
+      path: packages/video_player/video_player_platform_interface
   video_player_web:
-    path: ../
+    git:
+      url: https://github.com/JasmitSingh90/plugins.git
+      ref: custom-video-player-v1
+      path: packages/video_player/video_player_web
 
 dev_dependencies:
   flutter_driver:
